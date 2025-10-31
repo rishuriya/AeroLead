@@ -1,0 +1,289 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1 class="display-5 fw-bold">
+        <i class="bi bi-list-ul text-primary"></i>
+        Call Logs
+      </h1>
+      <p class="text-muted">View and manage all phone call records</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <%= link_to autodialer_index_path, class: "btn btn-primary btn-lg" do %>
+        <i class="bi bi-plus-circle"></i> New Call
+      <% end %>
+      <%= link_to autodialer_analytics_path, class: "btn btn-outline-info btn-lg" do %>
+        <i class="bi bi-graph-up"></i> Analytics
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-primary"><%= @stats[:total] %></h3>
+          <small class="text-muted">Total Calls</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-success"><%= @stats[:successful] %></h3>
+          <small class="text-muted">Successful</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-danger"><%= @stats[:failed] %></h3>
+          <small class="text-muted">Failed</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center">
+        <div class="card-body">
+          <h3 class="text-warning"><%= @stats[:pending] %></h3>
+          <small class="text-muted">Pending</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <%= form_with url: autodialer_logs_path, method: :get, local: true, class: "row g-3" do |f| %>
+        <div class="col-md-3">
+          <%= text_field_tag :search, params[:search],
+              class: "form-control",
+              placeholder: "Search phone number..." %>
+        </div>
+        <div class="col-md-2">
+          <%= select_tag :status, options_for_select([
+              ['All Status', ''],
+              ['Queued', 'queued'],
+              ['Ringing', 'ringing'],
+              ['In Progress', 'in-progress'],
+              ['Completed', 'completed'],
+              ['Failed', 'failed'],
+              ['Busy', 'busy'],
+              ['No Answer', 'no-answer'],
+              ['Canceled', 'canceled']
+            ], params[:status]),
+            class: "form-select" %>
+        </div>
+        <div class="col-md-2">
+          <%= date_field_tag :start_date, params[:start_date],
+              class: "form-control",
+              placeholder: "Start date" %>
+        </div>
+        <div class="col-md-2">
+          <%= date_field_tag :end_date, params[:end_date],
+              class: "form-control",
+              placeholder: "End date" %>
+        </div>
+        <div class="col-md-3">
+          <%= submit_tag "Filter", class: "btn btn-primary w-100" %>
+          <%= link_to "Reset", autodialer_logs_path, class: "btn btn-secondary w-100 mt-2" %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Calls Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+          <i class="bi bi-telephone"></i> Recent Calls
+        </h5>
+        <small class="text-muted">Showing <%= @phone_calls.size %> calls</small>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Phone Number</th>
+              <th>Status</th>
+              <th>Duration</th>
+              <th>Message</th>
+              <th>Called At</th>
+              <th>Retry Count</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if @phone_calls.any? %>
+              <% @phone_calls.each do |call| %>
+                <tr>
+                  <td class="font-monospace">
+                    <i class="bi bi-telephone-fill"></i>
+                    <%= call.phone_number %>
+                  </td>
+                  <td>
+                    <% case call.status %>
+                    <% when 'completed' %>
+                      <span class="badge bg-success">
+                        <i class="bi bi-check-circle"></i> Completed
+                      </span>
+                    <% when 'failed' %>
+                      <span class="badge bg-danger">
+                        <i class="bi bi-x-circle"></i> Failed
+                      </span>
+                    <% when 'in-progress' %>
+                      <span class="badge bg-info">
+                        <i class="bi bi-arrow-repeat"></i> In Progress
+                      </span>
+                    <% when 'ringing' %>
+                      <span class="badge bg-primary">
+                        <i class="bi bi-phone-vibrate"></i> Ringing
+                      </span>
+                    <% when 'busy' %>
+                      <span class="badge bg-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Busy
+                      </span>
+                    <% when 'no-answer' %>
+                      <span class="badge bg-secondary">
+                        <i class="bi bi-telephone-x"></i> No Answer
+                      </span>
+                    <% when 'canceled' %>
+                      <span class="badge bg-dark">
+                        <i class="bi bi-slash-circle"></i> Canceled
+                      </span>
+                    <% else %>
+                      <span class="badge bg-light text-dark">
+                        <i class="bi bi-clock"></i> <%= call.status.titleize %>
+                      </span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if call.duration %>
+                      <i class="bi bi-clock-history"></i>
+                      <%= call.duration_formatted %>
+                    <% else %>
+                      <span class="text-muted">-</span>
+                    <% end %>
+                  </td>
+                  <td class="text-truncate" style="max-width: 200px;">
+                    <%= call.message.truncate(50) %>
+                  </td>
+                  <td>
+                    <% if call.called_at %>
+                      <small>
+                        <%= call.called_at.strftime("%b %d, %Y") %><br>
+                        <%= call.called_at.strftime("%I:%M %p") %>
+                      </small>
+                    <% else %>
+                      <span class="text-muted">Not yet</span>
+                    <% end %>
+                  </td>
+                  <td class="text-center">
+                    <% if call.retry_count > 0 %>
+                      <span class="badge bg-warning"><%= call.retry_count %></span>
+                    <% else %>
+                      <span class="text-muted">0</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <% if call.call_sid %>
+                        <button type="button" class="btn btn-outline-info btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#callDetails<%= call.id %>"
+                                title="View Details">
+                          <i class="bi bi-info-circle"></i>
+                        </button>
+                      <% end %>
+
+                      <% if call.pending? %>
+                        <%= button_to api_v1_phone_call_path(call.id), method: :delete,
+                            data: { confirm: "Cancel this call?" },
+                            class: "btn btn-outline-danger btn-sm",
+                            title: "Cancel Call" do %>
+                          <i class="bi bi-x-circle"></i>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Call Details Modal -->
+                <div class="modal fade" id="callDetails<%= call.id %>" tabindex="-1">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">
+                          <i class="bi bi-info-circle"></i> Call Details
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body">
+                        <dl class="row">
+                          <dt class="col-sm-4">Phone Number:</dt>
+                          <dd class="col-sm-8 font-monospace"><%= call.phone_number %></dd>
+
+                          <dt class="col-sm-4">Call SID:</dt>
+                          <dd class="col-sm-8 font-monospace small"><%= call.call_sid %></dd>
+
+                          <dt class="col-sm-4">Status:</dt>
+                          <dd class="col-sm-8"><%= call.status.titleize %></dd>
+
+                          <dt class="col-sm-4">Duration:</dt>
+                          <dd class="col-sm-8"><%= call.duration_formatted || 'N/A' %></dd>
+
+                          <dt class="col-sm-4">Message:</dt>
+                          <dd class="col-sm-8"><%= call.message %></dd>
+
+                          <dt class="col-sm-4">Called At:</dt>
+                          <dd class="col-sm-8">
+                            <%= call.called_at&.strftime("%B %d, %Y at %I:%M %p") || 'Not yet called' %>
+                          </dd>
+
+                          <dt class="col-sm-4">Created At:</dt>
+                          <dd class="col-sm-8"><%= call.created_at.strftime("%B %d, %Y at %I:%M %p") %></dd>
+
+                          <dt class="col-sm-4">Retry Count:</dt>
+                          <dd class="col-sm-8"><%= call.retry_count %></dd>
+
+                          <% if call.error_message %>
+                            <dt class="col-sm-4">Error:</dt>
+                            <dd class="col-sm-8 text-danger"><%= call.error_message %></dd>
+                          <% end %>
+                        </dl>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="7" class="text-center py-5">
+                  <i class="bi bi-telephone-x text-muted" style="font-size: 3rem;"></i>
+                  <p class="mt-3 text-muted">No calls found matching your criteria</p>
+                  <%= link_to "Make a Call", autodialer_index_path, class: "btn btn-primary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <% if @phone_calls.any? %>
+      <div class="card-footer">
+        <div class="d-flex justify-content-center">
+          <%= paginate @phone_calls %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

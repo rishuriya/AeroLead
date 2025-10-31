@@ -1,0 +1,20 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
+  username: <%= ENV.fetch("DB_USERNAME", "") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "") %>
+
+development:
+  <<: *default
+  database: autodialer_development
+
+test:
+  <<: *default
+  database: autodialer_test
+
+production:
+  <<: *default
+  url: <%= ENV['DATABASE_URL'] %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>

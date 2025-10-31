@@ -1,0 +1,418 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-5 fw-bold">
+        <i class="bi bi-speedometer2" style="background: linear-gradient(135deg, #667eea 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+        Analytics Dashboard
+      </h1>
+      <p class="text-muted">Complete insights for calls and blog posts</p>
+    </div>
+  </div>
+
+  <!-- Overview Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <div class="card-body">
+          <div class="stat-value"><%= @phone_call_stats[:total] %></div>
+          <div class="stat-label"><i class="bi bi-telephone me-1"></i>Total Calls</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white;">
+        <div class="card-body">
+          <div class="stat-value"><%= @blog_analytics[:total] %></div>
+          <div class="stat-label"><i class="bi bi-journal-text me-1"></i>Total Articles</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card" style="background: linear-gradient(135deg, #667eea 0%, #3b82f6 100%); color: white;">
+        <div class="card-body">
+          <div class="stat-value"><%= number_to_percentage(@call_analytics[:success_rate], precision: 1) %></div>
+          <div class="stat-label"><i class="bi bi-check-circle me-1"></i>Call Success Rate</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+      <div class="card stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #667eea 100%); color: white;">
+        <div class="card-body">
+          <div class="stat-value"><%= @calls_today + @blogs_today %></div>
+          <div class="stat-label"><i class="bi bi-lightning me-1"></i>Today's Activity</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Call Analytics Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="bi bi-telephone" style="color: #667eea;"></i> Call Analytics</h4>
+        </div>
+        <div class="card-body">
+          <!-- Call Stats Row -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #667eea;"><%= @call_analytics[:successful_calls] %></div>
+                  <h6 class="text-muted mt-2">Successful</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #3b82f6;"><%= @call_analytics[:failed_calls] %></div>
+                  <h6 class="text-muted mt-2">Failed</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #667eea;"><%= @call_analytics[:pending_calls] %></div>
+                  <h6 class="text-muted mt-2">Pending</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #3b82f6;"><%= @call_analytics[:avg_duration] %>s</div>
+                  <h6 class="text-muted mt-2">Avg Duration</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call Charts -->
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Call Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                  <div style="position: relative; height: 300px;">
+                    <canvas id="statusChart"></canvas>
+                  </div>
+                  <div class="mt-4">
+                    <div class="row g-2">
+                      <% @call_analytics[:by_status].each do |status, count| %>
+                        <div class="col-6">
+                          <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-circle-fill" style="color: <%= status_color(status) %>;"></i> <%= status.titleize %></span>
+                            <strong><%= count %></strong>
+                          </div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="bi bi-graph-up"></i> Daily Call Volume</h5>
+                </div>
+                <div class="card-body">
+                  <div style="position: relative; height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Analytics Section -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h4 class="mb-0"><i class="bi bi-journal-text" style="color: #3b82f6;"></i> Blog Analytics</h4>
+        </div>
+        <div class="card-body">
+          <!-- Blog Stats Row -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #667eea;"><%= @blog_analytics[:published] %></div>
+                  <h6 class="text-muted mt-2">Published</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #3b82f6;"><%= @blog_analytics[:draft] %></div>
+                  <h6 class="text-muted mt-2">Drafts</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #667eea;"><%= @blog_analytics[:archived] %></div>
+                  <h6 class="text-muted mt-2">Archived</h6>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="card border-0" style="background: #f8fafc;">
+                <div class="card-body text-center">
+                  <div class="display-6 fw-bold" style="color: #3b82f6;"><%= @blog_analytics[:today_count] %></div>
+                  <h6 class="text-muted mt-2">Today</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Blog Charts -->
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="bi bi-pie-chart"></i> Blog Status Distribution</h5>
+                </div>
+                <div class="card-body">
+                  <div style="position: relative; height: 300px;">
+                    <canvas id="blogStatusChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6 mb-4">
+              <div class="card h-100">
+                <div class="card-header">
+                  <h5 class="mb-0"><i class="bi bi-graph-up"></i> Weekly Blog Trend</h5>
+                </div>
+                <div class="card-body">
+                  <div style="position: relative; height: 300px;">
+                    <canvas id="blogTrendChart"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-telephone" style="color: #667eea;"></i> Recent Calls</h5>
+        </div>
+        <div class="card-body p-0">
+          <% if @recent_calls.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Phone Number</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @recent_calls.each do |call| %>
+                    <tr>
+                      <td><%= call.phone_number %></td>
+                      <td>
+                        <% if call.successful? %>
+                          <span class="badge" style="background: #667eea; color: white;">Completed</span>
+                        <% elsif call.failed? %>
+                          <span class="badge" style="background: #3b82f6; color: white;">Failed</span>
+                        <% else %>
+                          <span class="badge" style="background: #9ca3af; color: white;">Pending</span>
+                        <% end %>
+                      </td>
+                      <td><%= call.formatted_duration %></td>
+                      <td><small class="text-muted"><%= time_ago_in_words(call.created_at) %> ago</small></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+              <p>No calls yet</p>
+            </div>
+          <% end %>
+        </div>
+        <div class="card-footer text-center">
+          <%= link_to "View All Calls", autodialer_logs_path, class: "btn btn-sm", style: "background: #667eea; color: white; border: none;" %>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6 mb-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="bi bi-journal-text" style="color: #3b82f6;"></i> Recent Blog Posts</h5>
+        </div>
+        <div class="card-body p-0">
+          <% if @recent_blogs.any? %>
+            <div class="list-group list-group-flush">
+              <% @recent_blogs.each do |blog| %>
+                <div class="list-group-item">
+                  <div class="d-flex w-100 justify-content-between">
+                    <h6 class="mb-1">
+                      <%= link_to blog.title, blog_post_path(blog.slug), class: "text-decoration-none", style: "color: #667eea;" %>
+                    </h6>
+                    <% if blog.ai_model.present? %>
+                      <small class="badge" style="background: #3b82f6; color: white;"><%= blog.ai_model.upcase %></small>
+                    <% end %>
+                  </div>
+                  <p class="mb-1 small text-muted"><%= blog.excerpt&.truncate(80) %></p>
+                  <small class="text-muted">
+                    <%= time_ago_in_words(blog.created_at) %> ago • <%= blog.word_count %> words
+                  </small>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="text-center py-4 text-muted">
+              <i class="bi bi-file-earmark-text" style="font-size: 3rem;"></i>
+              <p>No blog posts yet</p>
+            </div>
+          <% end %>
+        </div>
+        <div class="card-footer text-center">
+          <%= link_to "View All Posts", blog_posts_path, class: "btn btn-sm", style: "background: #3b82f6; color: white; border: none;" %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js Integration -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  // Call Status Chart
+  const statusData = <%= raw @call_analytics[:by_status].to_json %>;
+  const statusLabels = Object.keys(statusData).map(s => s.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+  const statusValues = Object.values(statusData);
+  
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        data: statusValues,
+        backgroundColor: ['#667eea', '#3b82f6', '#9ca3af', '#764ba2', '#2563eb'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Call Trend Chart
+  const trendData = <%= raw @call_analytics[:daily_trend].to_json %>;
+  const trendLabels = Object.keys(trendData);
+  const trendValues = Object.values(trendData);
+  
+  new Chart(document.getElementById('trendChart'), {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Calls per Day',
+        data: trendValues,
+        borderColor: '#667eea',
+        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+
+  // Blog Status Chart
+  const blogStatusData = {
+    published: <%= @blog_analytics[:published] %>,
+    draft: <%= @blog_analytics[:draft] %>,
+    archived: <%= @blog_analytics[:archived] %>
+  };
+  
+  new Chart(document.getElementById('blogStatusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Published', 'Draft', 'Archived'],
+      datasets: [{
+        data: [blogStatusData.published, blogStatusData.draft, blogStatusData.archived],
+        backgroundColor: ['#3b82f6', '#667eea', '#9ca3af'],
+        borderWidth: 2,
+        borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+
+  // Blog Trend Chart
+  const blogTrendData = <%= raw @blog_analytics[:weekly_trend].to_json %>;
+  const blogTrendLabels = Object.keys(blogTrendData);
+  const blogTrendValues = Object.values(blogTrendData);
+  
+  new Chart(document.getElementById('blogTrendChart'), {
+    type: 'line',
+    data: {
+      labels: blogTrendLabels,
+      datasets: [{
+        label: 'Blogs per Day',
+        data: blogTrendValues,
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } }
+      }
+    }
+  });
+</script>
+
+<style>
+  #statusChart, #trendChart, #blogStatusChart, #blogTrendChart {
+    max-height: 100% !important;
+    width: 100% !important;
+  }
+</style>

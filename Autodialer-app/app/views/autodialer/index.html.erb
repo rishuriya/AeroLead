@@ -1,0 +1,411 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h1 class="page-title">Autodialer</h1>
+      <p class="page-subtitle">Make automated phone calls with custom messages</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value"><%= @analytics[:total] %></div>
+        <div class="stat-label">Total Calls</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #3b82f6;"><%= @analytics[:successful] %></div>
+        <div class="stat-label">Successful</div>
+        <div class="stat-detail"><%= number_to_percentage(@analytics[:success_rate], precision: 1) %> success rate</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #9ca3af;"><%= @analytics[:pending] %></div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #ef4444;"><%= @analytics[:failed] %></div>
+        <div class="stat-label">Failed</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Make Calls Form -->
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Start New Calls</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: start_calling_autodialer_index_path, method: :post, local: true do |f| %>
+            <div class="form-group">
+              <label for="phone_numbers" class="form-label">Phone Numbers</label>
+              <small class="text-muted d-block mb-2">Enter one phone number per line</small>
+              <%= text_area_tag :phone_numbers, nil,
+                  class: "form-control",
+                  rows: 8,
+                  placeholder: "+91-9876543210\n+91-9876543211\n+91-9876543212",
+                  required: true %>
+              <small class="form-text text-muted mt-2">
+                Maximum <%= ENV.fetch('MAX_PHONE_NUMBERS_PER_BATCH', 100) %> numbers per batch
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="message" class="form-label">Message</label>
+              <%= text_area_tag :message,
+                  "This is an automated call from your service provider. Thank you for your time.",
+                  class: "form-control",
+                  rows: 4,
+                  placeholder: "Enter the message to be delivered...",
+                  maxlength: 500 %>
+              <small class="form-text text-muted mt-2">
+                Maximum 500 characters
+              </small>
+            </div>
+
+            <div class="form-actions">
+              <%= button_tag type: "submit", class: "btn btn-primary w-100" do %>
+                Start Calling
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Upload CSV -->
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">Upload CSV</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: upload_csv_autodialer_index_path, method: :post, local: true, multipart: true do |f| %>
+            <div class="form-group">
+              <label for="csv_file" class="form-label">Select CSV File</label>
+              <small class="text-muted d-block mb-2">Must have 'phone_number' column</small>
+              <%= file_field_tag :csv_file,
+                  class: "form-control",
+                  accept: ".csv",
+                  required: true %>
+            </div>
+
+            <div class="form-group">
+              <label for="message" class="form-label">Message</label>
+              <%= text_area_tag :message,
+                  "This is an automated call.",
+                  class: "form-control",
+                  rows: 3 %>
+            </div>
+
+            <div class="form-actions">
+              <%= button_tag type: "submit", class: "btn btn-secondary w-100" do %>
+                Upload & Start
+              <% end %>
+            </div>
+          <% end %>
+
+          <div class="mt-4 pt-4 border-top">
+            <strong class="d-block mb-2">CSV Format:</strong>
+            <pre class="bg-light p-3 rounded small mb-0"><code>phone_number
++91-9876543210
++91-9876543211
++91-9876543212</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Calls -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="card-title mb-0">Recent Calls</h3>
+          <%= link_to autodialer_logs_path, class: "btn-link" do %>
+            View All Logs →
+          <% end %>
+        </div>
+        <div class="card-body p-0">
+          <% if @phone_calls.any? %>
+            <div class="table-responsive">
+              <table class="table mb-0">
+                <thead>
+                  <tr>
+                    <th>Phone Number</th>
+                    <th>Message</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @phone_calls.each do |call| %>
+                    <tr>
+                      <td class="font-monospace"><%= call.phone_number %></td>
+                      <td><small class="text-muted"><%= call.message&.truncate(30) %></small></td>
+                      <td>
+                        <% case call.status %>
+                        <% when 'completed' %>
+                          <span class="badge badge-success">Completed</span>
+                        <% when 'failed', 'busy', 'no-answer' %>
+                          <span class="badge badge-error"><%= call.status.titleize %></span>
+                        <% when 'queued', 'ringing', 'in-progress' %>
+                          <span class="badge badge-warning"><%= call.status.titleize %></span>
+                        <% else %>
+                          <span class="badge badge-secondary"><%= call.status %></span>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if call.duration %>
+                          <span class="text-muted"><%= call.formatted_duration %></span>
+                        <% else %>
+                          <span class="text-muted">-</span>
+                        <% end %>
+                      </td>
+                      <td><small class="text-muted"><%= time_ago_in_words(call.created_at) %> ago</small></td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="card-footer">
+              <%= paginate @phone_calls %>
+            </div>
+          <% else %>
+            <div class="empty-state">
+              <div class="empty-icon">📞</div>
+              <h4>No calls yet</h4>
+              <p class="text-muted">Start making calls by entering phone numbers</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  .stat-detail {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-actions {
+    margin-top: 2rem;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5568d3;
+  }
+
+  .btn-secondary {
+    background: #6b7280;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background: #4b5563;
+  }
+
+  .btn-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .btn-link:hover {
+    color: #5568d3;
+  }
+
+  .badge {
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-success {
+    background: #f0f9ff;
+    color: #3b82f6;
+  }
+
+  .badge-error {
+    background: #fef2f2;
+    color: #ef4444;
+  }
+
+  .badge-warning {
+    background: #fffbeb;
+    color: #f59e0b;
+  }
+
+  .badge-secondary {
+    background: #f9fafb;
+    color: #6b7280;
+  }
+
+  .table {
+    width: 100%;
+  }
+
+  .table thead {
+    background: #f9fafb;
+  }
+
+  .table thead th {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .table tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .table tbody tr:hover {
+    background: #f9fafb;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+</style>
