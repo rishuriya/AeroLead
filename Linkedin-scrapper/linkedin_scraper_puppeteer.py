@@ -111,12 +111,10 @@ class PuppeteerLinkedInScraper:
                 'HEADLESS': 'true' if self.headless else 'false',
             }
             
-            # Add 2Captcha API key if available (for recaptcha solving - fallback)
             twocaptcha_key = os.getenv('TWOCAPTCHA_API_KEY', '')
             if twocaptcha_key:
                 env['TWOCAPTCHA_API_KEY'] = twocaptcha_key
             
-            # Add Gemini API key if available (preferred for recaptcha solving)
             gemini_key = os.getenv('GEMINI_API_KEY', '')
             if gemini_key:
                 env['GEMINI_API_KEY'] = gemini_key
@@ -127,7 +125,7 @@ class PuppeteerLinkedInScraper:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=300,  # 5 minute timeout
+                timeout=600,  # 10 minute timeout
                 env=env
             )
 

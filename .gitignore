@@ -1,0 +1,9 @@
+# Technical documentation (internal use only)
+TECHNICAL_ARCHITECTURE.md
+
+# OS files
+.DS_Store
+
+# Backup files
+*.bak
+command.md

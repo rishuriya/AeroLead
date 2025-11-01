@@ -334,11 +334,17 @@ ScaleScribe/
 │   │       ├── package.json
 │   │       └── .linkedin_cookies.json  # Session cookies
 │   └── README.md                # Detailed app documentation
-│
-├── Linkedin-scrapper/           # Standalone scraper (alternative)
-│   ├── puppeteer_scraper.js     # Node.js scraping script
-│   ├── config.py                # Python config (legacy)
-│   └── README.md
+├── Blog-generator/              # Standalone Python blog generator
+│   ├── blog_generator.py        # Main CLI tool
+│   ├── ai_service.py           # Gemini & OpenAI services
+│   ├── config.py               # Configuration
+│   ├── output/                 # Generated articles
+│   └── README.md               # Blog generator docs
+├── Linkedin-scrapper/           # Standalone LinkedIn scraper
+│   ├── puppeteer_scraper.js    # Puppeteer scraper
+│   ├── linkedin_scraper_puppeteer.py  # Python wrapper
+│   ├── config.py                # Python config
+│   └── README.md               # Scraper docs
 │
 ├── render.yaml                  # Deployment configuration
 │   └── Services:
