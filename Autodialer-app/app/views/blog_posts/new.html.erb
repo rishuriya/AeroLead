@@ -1,0 +1,135 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><%= link_to "Home", root_path %></li>
+      <li class="breadcrumb-item"><%= link_to "Blog Posts", blog_posts_path %></li>
+      <li class="breadcrumb-item active" aria-current="page">New Post</li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-5 fw-bold">
+        <i class="bi bi-plus-circle text-primary"></i>
+        Create New Blog Post
+      </h1>
+      <p class="text-muted">Write and publish your article</p>
+    </div>
+  </div>
+
+  <!-- Info Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card bg-primary text-white">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="bi bi-lightbulb"></i> Tip: Use Markdown
+          </h6>
+          <small>Format your content with Markdown syntax for better styling</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-info text-white">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="bi bi-stars"></i> Try AI Generation
+          </h6>
+          <small>Use <%= link_to "AI Blog Generator", generate_new_blog_posts_path, class: "text-white fw-bold" %> for instant content</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card bg-success text-white">
+        <div class="card-body">
+          <h6 class="card-title">
+            <i class="bi bi-save"></i> Save as Draft
+          </h6>
+          <small>Work in progress? Save it as a draft to publish later</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <%= render 'form', blog_post: @blog_post %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Markdown Quick Reference -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">
+            <i class="bi bi-book"></i> Markdown Quick Reference
+          </h6>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <table class="table table-sm table-borderless">
+                <tbody>
+                  <tr>
+                    <td><code># Heading 1</code></td>
+                    <td>Main heading</td>
+                  </tr>
+                  <tr>
+                    <td><code>## Heading 2</code></td>
+                    <td>Subheading</td>
+                  </tr>
+                  <tr>
+                    <td><code>**bold**</code></td>
+                    <td>Bold text</td>
+                  </tr>
+                  <tr>
+                    <td><code>*italic*</code></td>
+                    <td>Italic text</td>
+                  </tr>
+                  <tr>
+                    <td><code>[Link](url)</code></td>
+                    <td>Hyperlink</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="col-md-6">
+              <table class="table table-sm table-borderless">
+                <tbody>
+                  <tr>
+                    <td><code>- List item</code></td>
+                    <td>Bullet point</td>
+                  </tr>
+                  <tr>
+                    <td><code>1. List item</code></td>
+                    <td>Numbered list</td>
+                  </tr>
+                  <tr>
+                    <td><code>`code`</code></td>
+                    <td>Inline code</td>
+                  </tr>
+                  <tr>
+                    <td><code>```code block```</code></td>
+                    <td>Code block</td>
+                  </tr>
+                  <tr>
+                    <td><code>> Quote</code></td>
+                    <td>Blockquote</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

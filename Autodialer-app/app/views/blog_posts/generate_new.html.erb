@@ -1,0 +1,306 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-md-8">
+      <h1 class="page-title">Generate Blog Posts</h1>
+      <p class="page-subtitle">Create high-quality blog content using AI</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <%= link_to blog_posts_path, class: "btn btn-outline" do %>
+        ← Back to Posts
+      <% end %>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Generation Form -->
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">AI Generation Settings</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: generate_blog_posts_path, method: :post, local: true do |f| %>
+            <div class="form-group">
+              <label for="titles" class="form-label">Blog Titles</label>
+              <small class="text-muted d-block mb-2">Enter one title per line</small>
+              <%= text_area_tag :titles, nil,
+                  class: "form-control",
+                  rows: 8,
+                  placeholder: "10 Benefits of Daily Exercise\nHow to Start a Successful Blog\nThe Future of Artificial Intelligence",
+                  required: true %>
+              <small class="form-text text-muted mt-2">
+                Maximum <%= ENV.fetch('MAX_BULK_ARTICLES', 20) %> titles per batch
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="word_count" class="form-label">Target Word Count</label>
+              <%= number_field_tag :word_count, 1000,
+                  class: "form-control",
+                  min: 300,
+                  max: 3000,
+                  step: 100 %>
+              <small class="form-text text-muted mt-2">
+                Recommended: 800-1500 words for SEO-optimized content
+              </small>
+            </div>
+
+            <div class="form-group">
+              <label for="context" class="form-label">Additional Context</label>
+              <small class="text-muted d-block mb-2">Optional - Provide specific instructions, tone, or audience</small>
+              <%= text_area_tag :context, nil,
+                  class: "form-control",
+                  rows: 4,
+                  placeholder: "Provide any specific instructions, tone, audience, or additional context..." %>
+            </div>
+
+            <div class="form-actions">
+              <%= button_tag type: "submit", class: "btn btn-primary w-100" do %>
+                Generate Blog Posts
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-body">
+          <div class="info-box">
+            <strong class="d-block mb-2">Processing Information</strong>
+            <p class="text-muted mb-0 small">
+              Blog posts are generated in the background using Gemini AI. You'll be redirected to the blog posts page where you can monitor progress. Each post typically takes 1-2 minutes depending on length.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tips & Info -->
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">About Gemini AI</h3>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-3">
+            Google's latest AI model offering excellent quality at amazing speed. Perfect for creating engaging, SEO-optimized blog content at scale.
+          </p>
+          
+          <div class="mb-4">
+            <div class="feature-tag">Fast</div>
+            <div class="feature-tag">Cost-Effective</div>
+            <div class="feature-tag">High Quality</div>
+            <div class="feature-tag">SEO Optimized</div>
+          </div>
+
+          <div class="features-list">
+            <strong class="d-block mb-2">Key Features:</strong>
+            <ul class="text-muted small mb-0">
+              <li>Understands complex topics and explains them clearly</li>
+              <li>Creates engaging, natural-sounding content</li>
+              <li>Optimizes for search engines automatically</li>
+              <li>Handles bulk generation efficiently</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="card-title">Tips for Best Results</h3>
+        </div>
+        <div class="card-body">
+          <ul class="tips-list">
+            <li>
+              <strong>Be specific with titles:</strong> "10 Tips for Remote Work" is better than just "Remote Work"
+            </li>
+            <li>
+              <strong>Provide context:</strong> Include your target audience, desired tone, and key points to cover
+            </li>
+            <li>
+              <strong>Optimal length:</strong> 800-1500 words performs best for SEO while maintaining reader engagement
+            </li>
+            <li>
+              <strong>Batch generation:</strong> Generate multiple posts at once to save time
+            </li>
+            <li>
+              <strong>Review and edit:</strong> AI-generated content is a starting point. Always review and personalize before publishing
+            </li>
+            <li>
+              <strong>SEO optimization:</strong> Include relevant keywords in your title and context for better search rankings
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    font-family: inherit;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .form-actions {
+    margin-top: 2rem;
+  }
+
+  .info-box {
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 6px;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    background: #f0f9ff;
+    color: #3b82f6;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .features-list ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .features-list li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 0.5rem;
+  }
+
+  .features-list li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+  }
+
+  .tips-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .tips-list li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+
+  .tips-list li::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+  }
+
+  .tips-list li:last-child {
+    margin-bottom: 0;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5568d3;
+  }
+
+  .btn-outline {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+</style>

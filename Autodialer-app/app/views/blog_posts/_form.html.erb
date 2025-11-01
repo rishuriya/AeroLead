@@ -1,0 +1,166 @@
+<%= form_with(model: blog_post, local: true, class: "needs-validation", novalidate: true) do |form| %>
+  <% if blog_post.errors.any? %>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      <h5 class="alert-heading">
+        <i class="bi bi-exclamation-triangle"></i>
+        <%= pluralize(blog_post.errors.count, "error") %> prohibited this blog post from being saved:
+      </h5>
+      <ul class="mb-0">
+        <% blog_post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  <% end %>
+
+  <!-- Title -->
+  <div class="mb-4">
+    <%= form.label :title, class: "form-label fw-bold" do %>
+      Title <span class="text-danger">*</span>
+    <% end %>
+    <%= form.text_field :title, class: "form-control form-control-lg",
+        placeholder: "Enter article title", required: true,
+        autofocus: true %>
+    <div class="form-text">This will be used to generate the URL slug</div>
+  </div>
+
+  <!-- Slug (optional override) -->
+  <div class="mb-4">
+    <%= form.label :slug, class: "form-label fw-bold" do %>
+      Slug <small class="text-muted">(optional - auto-generated from title)</small>
+    <% end %>
+    <%= form.text_field :slug, class: "form-control",
+        placeholder: "custom-url-slug" %>
+    <div class="form-text">Leave blank to auto-generate from title</div>
+  </div>
+
+  <!-- Content -->
+  <div class="mb-4">
+    <%= form.label :content, class: "form-label fw-bold" do %>
+      Content <span class="text-danger">*</span>
+      <small class="text-muted">(Markdown supported)</small>
+    <% end %>
+    <%= form.text_area :content, class: "form-control font-monospace",
+        rows: 20, placeholder: "Write your article content here...\n\n# Heading\n\n**Bold text**\n\n- List item",
+        required: true %>
+    <div class="form-text">
+      <i class="bi bi-info-circle"></i>
+      Markdown syntax is supported: # for headings, **bold**, *italic*, [links](url), etc.
+    </div>
+  </div>
+
+  <!-- Excerpt -->
+  <div class="mb-4">
+    <%= form.label :excerpt, class: "form-label fw-bold" do %>
+      Excerpt <small class="text-muted">(optional)</small>
+    <% end %>
+    <%= form.text_area :excerpt, class: "form-control", rows: 3,
+        placeholder: "Brief summary of the article (auto-generated if left blank)" %>
+    <div class="form-text">Leave blank to auto-generate from content</div>
+  </div>
+
+  <div class="row">
+    <!-- Status -->
+    <div class="col-md-4 mb-4">
+      <%= form.label :status, class: "form-label fw-bold" do %>
+        Status <span class="text-danger">*</span>
+      <% end %>
+      <%= form.select :status,
+          [['Draft', 'draft'], ['Published', 'published'], ['Archived', 'archived']],
+          {},
+          { class: "form-select", required: true } %>
+    </div>
+
+    <!-- AI Model -->
+    <div class="col-md-4 mb-4">
+      <%= form.label :ai_model, class: "form-label fw-bold" do %>
+        AI Model <small class="text-muted">(if AI-generated)</small>
+      <% end %>
+      <%= form.select :ai_model,
+          [['Not AI Generated', ''], ['Gemini', 'gemini'], ['OpenAI', 'openai'], ['Anthropic', 'anthropic']],
+          {},
+          { class: "form-select" } %>
+    </div>
+
+    <!-- Published At -->
+    <div class="col-md-4 mb-4">
+      <%= form.label :published_at, class: "form-label fw-bold" do %>
+        Published Date <small class="text-muted">(if published)</small>
+      <% end %>
+      <%= form.datetime_local_field :published_at, class: "form-control" %>
+    </div>
+  </div>
+
+  <!-- Metadata (Advanced) -->
+  <div class="mb-4">
+    <div class="card">
+      <div class="card-header">
+        <h6 class="mb-0">
+          <i class="bi bi-code-square"></i> Metadata (Advanced)
+          <small class="text-muted">- Optional JSON data</small>
+        </h6>
+      </div>
+      <div class="card-body">
+        <%= form.text_area :metadata, class: "form-control font-monospace", rows: 5,
+            placeholder: '{"tags": ["ruby", "rails"], "seo": {"keywords": "example"}}',
+            value: blog_post.metadata.present? ? JSON.pretty_generate(blog_post.metadata) : '' %>
+        <div class="form-text">
+          Enter valid JSON for additional metadata (tags, SEO info, etc.)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="btn-group" role="group">
+      <%= form.submit "Save Post", class: "btn btn-primary btn-lg" %>
+      <% if blog_post.persisted? %>
+        <%= form.submit "Save as Draft", class: "btn btn-outline-warning btn-lg",
+            onclick: "document.getElementById('blog_post_status').value='draft'" %>
+      <% end %>
+    </div>
+
+    <div>
+      <%= link_to "Cancel", blog_post.persisted? ? blog_post_path(blog_post.slug) : blog_posts_path,
+          class: "btn btn-secondary btn-lg" %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  // Preview functionality (optional enhancement)
+  document.addEventListener('DOMContentLoaded', function() {
+    const contentField = document.querySelector('#blog_post_content');
+    const titleField = document.querySelector('#blog_post_title');
+    const slugField = document.querySelector('#blog_post_slug');
+
+    // Auto-generate slug from title if slug is empty
+    if (titleField && slugField) {
+      titleField.addEventListener('blur', function() {
+        if (!slugField.value) {
+          const slug = titleField.value
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+          slugField.value = slug;
+        }
+      });
+    }
+
+    // Character count for content
+    if (contentField) {
+      const updateWordCount = () => {
+        const text = contentField.value.trim();
+        const words = text.split(/\s+/).filter(w => w.length > 0).length;
+        const readingTime = Math.ceil(words / 200);
+
+        // Display word count (you can add a div for this)
+        console.log(`Words: ${words}, Reading time: ${readingTime} min`);
+      };
+
+      contentField.addEventListener('input', updateWordCount);
+    }
+  });
+</script>

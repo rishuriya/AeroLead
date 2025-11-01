@@ -1,0 +1,544 @@
+<!-- Agentic Command Interface - Professional Claude-style Design -->
+<div class="agentic-command-wrapper">
+  <div class="agentic-command-container">
+    <!-- Header -->
+    <div class="agentic-command-header">
+      <h1 class="agentic-title">AeroLead AI Assistant</h1>
+      <p class="agentic-subtitle">Automate your workflow with natural language commands</p>
+    </div>
+
+    <!-- Command Input Box -->
+    <div class="command-input-box">
+      <div class="command-input-area">
+        <textarea
+          id="agenticCommandInput"
+          class="command-textarea"
+          placeholder="What would you like to do?"
+          rows="1"
+        ></textarea>
+        <button class="command-send-btn" type="button" id="executeCommandBtn" title="Send command">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2.5 10L17.5 10M17.5 10L11.6667 4.16667M17.5 10L11.6667 15.8333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Examples -->
+    <div class="command-examples">
+      <p class="example-label">Examples:</p>
+      <div class="example-buttons">
+        <button class="example-btn" data-command="call +91-9876543210 with welcome message">
+          Call a number
+        </button>
+        <button class="example-btn" data-command="generate blog post about artificial intelligence">
+          Write a blog
+        </button>
+        <button class="example-btn" data-command="show me the call statistics">
+          Check status
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="commandLoading" class="command-loading" style="display: none;">
+      <div class="loading-dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <p class="loading-text">Processing your request...</p>
+    </div>
+
+    <!-- Result Display -->
+    <div id="commandResult" class="command-result" style="display: none;">
+      <div class="result-content">
+        <div class="result-icon">
+          <i class="bi" id="resultIcon"></i>
+        </div>
+        <div class="result-text">
+          <div id="resultMessage" class="result-message"></div>
+          <div id="resultDetails" class="result-details"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .agentic-command-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  .agentic-command-container {
+    width: 100%;
+    max-width: 800px;
+  }
+
+  .agentic-command-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .agentic-title {
+    font-size: 3rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  .agentic-subtitle {
+    color: #6b7280;
+    font-size: 1.125rem;
+    margin: 0;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .command-input-box {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    margin-bottom: 2rem;
+  }
+
+  .command-input-box:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .command-input-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+  }
+
+  .command-textarea {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: none;
+    min-height: 48px;
+    max-height: 200px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    background: transparent;
+    color: #1f2937;
+    font-weight: 400;
+  }
+
+  .command-textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  .command-send-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    margin-bottom: 6px;
+  }
+
+  .command-send-btn:hover:not(:disabled) {
+    background: #5568d3;
+  }
+
+  .command-send-btn:active {
+    transform: scale(0.95);
+  }
+
+  .command-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .command-examples {
+    text-align: center;
+  }
+
+  .example-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .example-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .example-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 400;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  .example-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+    color: #1f2937;
+  }
+
+  .command-loading {
+    margin-top: 1.5rem;
+    text-align: center;
+    padding: 1.5rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .loading-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .loading-dots span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #667eea;
+    animation: bounce 1.4s infinite ease-in-out both;
+  }
+
+  .loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  .loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes bounce {
+    0%, 80%, 100% {
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .loading-text {
+    color: #6b7280;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .command-result {
+    margin-top: 1.5rem;
+    animation: slideUp 0.3s ease;
+  }
+
+  .result-content {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 8px;
+    background: #f9fafb;
+    border-left: 4px solid #667eea;
+  }
+
+  .result-content.success {
+    background: #f0f9ff;
+    border-left-color: #3b82f6;
+  }
+
+  .result-content.error {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+  }
+
+  .result-icon {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+  }
+
+  .result-content.success .result-icon {
+    color: #3b82f6;
+  }
+
+  .result-content.error .result-icon {
+    color: #ef4444;
+  }
+
+  .result-text {
+    flex: 1;
+  }
+
+  .result-message {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-details {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Auto-expand textarea */
+  .command-textarea:focus {
+    min-height: 60px;
+  }
+</style>
+
+<script>
+  (function() {
+    // Wait for DOM and jQuery to be ready
+    function initAgenticCommand() {
+      if (typeof jQuery === 'undefined') {
+        setTimeout(initAgenticCommand, 100);
+        return;
+      }
+
+      jQuery(document).ready(function($) {
+        const $input = $('#agenticCommandInput');
+        const $executeBtn = $('#executeCommandBtn');
+        const $loading = $('#commandLoading');
+        const $result = $('#commandResult');
+
+        if (!$input.length || !$executeBtn.length) {
+          console.error('Agentic command elements not found');
+          return;
+        }
+
+        // Auto-resize textarea
+        $input.on('input', function() {
+          this.style.height = 'auto';
+          this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Example buttons
+        $('.example-btn').on('click', function() {
+          const command = $(this).data('command');
+          $input.val(command);
+          $input.trigger('input');
+          $input.focus();
+        });
+
+        // Execute command on button click
+        $executeBtn.on('click', function(e) {
+          e.preventDefault();
+          executeCommand();
+        });
+
+        // Execute on Enter (without modifiers)
+        $input.on('keydown', function(e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            // Allow Ctrl/Cmd + Enter, but prevent Enter alone
+            if (e.ctrlKey || e.metaKey) {
+              e.preventDefault();
+              executeCommand();
+            }
+          }
+        });
+
+        function executeCommand() {
+          const command = $input.val().trim();
+
+          if (!command) {
+            alert('Please enter a command');
+            return;
+          }
+
+          // Show loading state
+          $result.hide();
+          $loading.fadeIn();
+          $executeBtn.prop('disabled', true);
+
+          // Get CSRF token
+          const csrfToken = $('meta[name="csrf-token"]').attr('content');
+          
+          if (!csrfToken) {
+            console.error('CSRF token not found');
+            $loading.hide();
+            $executeBtn.prop('disabled', false);
+            showResult('error', 'Security token missing. Please refresh the page.');
+            return;
+          }
+
+          // Send command to backend
+          $.ajax({
+            url: '/ai/command',
+            method: 'POST',
+            dataType: 'json',
+            data: {
+              command: command,
+              ai_model: 'gemini',
+              authenticity_token: csrfToken
+            },
+            headers: {
+              'X-CSRF-Token': csrfToken
+            },
+            success: function(response) {
+              $loading.hide();
+              $executeBtn.prop('disabled', false);
+
+              if (response && response.success) {
+                handleSuccessfulCommand(response);
+              } else {
+                showResult('error', response?.error || 'Command failed');
+              }
+            },
+            error: function(xhr, status, error) {
+              $loading.hide();
+              $executeBtn.prop('disabled', false);
+
+              let errorMsg = 'Failed to process command';
+              
+              if (xhr.responseJSON && xhr.responseJSON.error) {
+                errorMsg = xhr.responseJSON.error;
+              } else if (xhr.status === 0) {
+                errorMsg = 'Network error. Please check your connection.';
+              } else if (xhr.status >= 500) {
+                errorMsg = 'Server error. Please try again later.';
+              } else if (xhr.status === 422) {
+                errorMsg = 'Invalid request. Please check your command.';
+              }
+
+              console.error('AJAX Error:', status, error, xhr);
+              showResult('error', errorMsg);
+            }
+          });
+        }
+
+        function handleSuccessfulCommand(response) {
+          let message = response.message || 'Command executed successfully';
+          let redirectPath = null;
+
+          // Determine redirect path based on action
+          switch(response.action) {
+            case 'make_call':
+            case 'bulk_call':
+              message = response.message || 'Calls queued successfully';
+              redirectPath = '<%= autodialer_logs_path rescue '/autodialer/logs' %>';
+              break;
+
+            case 'generate_blog':
+            case 'bulk_generate_blog':
+              message = response.message || 'Blog posts generated successfully';
+              redirectPath = '<%= blog_posts_path rescue '/blog_posts' %>';
+              break;
+
+            case 'check_status':
+              // Show status, don't redirect
+              if (response.phone_calls && response.blog_posts) {
+                message = `Calls: ${response.phone_calls.total} total (${response.phone_calls.successful} successful) • `;
+                message += `Blogs: ${response.blog_posts.total} total (${response.blog_posts.published} published)`;
+              } else {
+                message = response.message || 'Status checked successfully';
+              }
+              break;
+            
+            default:
+              message = response.message || 'Command executed successfully';
+          }
+
+          showResult('success', message);
+
+          // Clear input
+          $input.val('');
+          $input.css('height', 'auto');
+
+          // Redirect after showing success message
+          if (redirectPath && redirectPath !== '') {
+            setTimeout(function() {
+              window.location.href = redirectPath;
+            }, 1500);
+          }
+        }
+
+        function showResult(type, message) {
+          const $resultContent = $result.find('.result-content');
+          const $resultIcon = $('#resultIcon');
+          const $resultMessage = $('#resultMessage');
+          const $resultDetails = $('#resultDetails');
+
+          // Set classes and icon
+          $resultContent.removeClass('success error').addClass(type);
+
+          if (type === 'success') {
+            $resultIcon.removeClass().addClass('bi bi-check-circle-fill');
+          } else {
+            $resultIcon.removeClass().addClass('bi bi-exclamation-circle-fill');
+          }
+
+          // Set message
+          $resultMessage.text(message || 'Operation completed');
+          $resultDetails.empty();
+
+          // Show result
+          $result.fadeIn();
+
+          // Auto-hide after 5 seconds (except for errors)
+          if (type === 'success') {
+            setTimeout(function() {
+              $result.fadeOut();
+            }, 5000);
+          }
+        }
+
+        console.log('Agentic command system initialized');
+      });
+    }
+
+    // Start initialization
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAgenticCommand);
+    } else {
+      initAgenticCommand();
+    }
+  })();
+</script>

@@ -1,0 +1,403 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-md-8">
+      <h1 class="page-title">Blog Posts</h1>
+      <p class="page-subtitle">AI-generated blog articles and content</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <div class="header-actions">
+        <%= link_to generate_new_blog_posts_path, class: "btn btn-primary" do %>
+          Generate with AI
+        <% end %>
+        <%= link_to new_blog_post_path, class: "btn btn-outline" do %>
+          New Post
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value"><%= @statistics[:total] %></div>
+        <div class="stat-label">Total Articles</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #3b82f6;"><%= @statistics[:published] %></div>
+        <div class="stat-label">Published</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #9ca3af;"><%= @statistics[:draft] %></div>
+        <div class="stat-label">Drafts</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #6b7280;"><%= @statistics[:archived] %></div>
+        <div class="stat-label">Archived</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <%= form_with url: blog_posts_path, method: :get, local: true, class: "filter-form" do |f| %>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <%= text_field_tag :search, params[:search],
+                    class: "form-control",
+                    placeholder: "Search posts..." %>
+              </div>
+              <div class="col-md-3">
+                <%= select_tag :status, options_for_select([
+                    ['All Status', ''],
+                    ['Published', 'published'],
+                    ['Draft', 'draft'],
+                    ['Archived', 'archived']
+                  ], params[:status]),
+                  class: "form-control" %>
+              </div>
+              <div class="col-md-3">
+                <%= select_tag :ai_model, options_for_select([
+                    ['All AI Models', ''],
+                    ['Gemini', 'gemini'],
+                    ['OpenAI', 'openai'],
+                    ['Anthropic', 'anthropic']
+                  ], params[:ai_model]),
+                  class: "form-control" %>
+              </div>
+              <div class="col-md-3">
+                <%= submit_tag "Filter", class: "btn btn-primary w-100" %>
+                <%= link_to "Reset", blog_posts_path, class: "btn btn-outline w-100 mt-2" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Blog Posts Grid -->
+  <div class="row">
+    <% if @blog_posts.any? %>
+      <% @blog_posts.each do |blog_post| %>
+        <div class="col-lg-6 mb-4">
+          <div class="blog-card">
+            <div class="blog-card-body">
+              <div class="blog-header">
+                <h3 class="blog-title">
+                  <%= link_to blog_post.title, blog_post_path(blog_post.slug), class: "blog-title-link" %>
+                </h3>
+                <% if blog_post.ai_model.present? %>
+                  <span class="blog-badge"><%= blog_post.ai_model.upcase %></span>
+                <% end %>
+              </div>
+
+              <div class="blog-status mb-3">
+                <% if blog_post.published? %>
+                  <span class="badge badge-success">Published</span>
+                <% elsif blog_post.draft? %>
+                  <span class="badge badge-warning">Draft</span>
+                <% else %>
+                  <span class="badge badge-secondary">Archived</span>
+                <% end %>
+              </div>
+
+              <p class="blog-excerpt"><%= blog_post.excerpt || blog_post.content.truncate(150) %></p>
+
+              <div class="blog-meta">
+                <span class="text-muted">
+                  <%= blog_post.reading_time %> min read • <%= blog_post.word_count %> words
+                </span>
+                <span class="text-muted">
+                  <%= time_ago_in_words(blog_post.created_at) %> ago
+                </span>
+              </div>
+            </div>
+
+            <div class="blog-card-footer">
+              <%= link_to blog_post_path(blog_post.slug), class: "btn-link" do %>
+                View
+              <% end %>
+              <%= link_to edit_blog_post_path(blog_post.slug), class: "btn-link" do %>
+                Edit
+              <% end %>
+              <% if blog_post.draft? %>
+                <%= button_to publish_blog_post_path(blog_post.slug), method: :post, class: "btn-link" do %>
+                  Publish
+                <% end %>
+              <% end %>
+              <%= button_to blog_post_path(blog_post.slug), method: :delete,
+                  data: { confirm: "Are you sure?" },
+                  class: "btn-link text-danger" do %>
+                Delete
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Pagination -->
+      <div class="col-12">
+        <div class="d-flex justify-content-center mt-4">
+          <%= paginate @blog_posts %>
+        </div>
+      </div>
+    <% else %>
+      <div class="col-12">
+        <div class="empty-state">
+          <div class="empty-icon">📝</div>
+          <h4>No blog posts yet</h4>
+          <p class="text-muted">Start by generating content with AI or create a new post manually</p>
+          <div class="mt-4">
+            <%= link_to generate_new_blog_posts_path, class: "btn btn-primary me-2" do %>
+              Generate with AI
+            <% end %>
+            <%= link_to new_blog_post_path, class: "btn btn-outline" do %>
+              Create Manually
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<style>
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .page-subtitle {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+  }
+
+  .stat-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 400;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  .filter-form .form-control {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+  }
+
+  .filter-form .form-control:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  .blog-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .blog-card-body {
+    padding: 1.5rem;
+    flex: 1;
+  }
+
+  .blog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .blog-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+    flex: 1;
+  }
+
+  .blog-title-link {
+    color: #1f2937;
+    text-decoration: none;
+  }
+
+  .blog-title-link:hover {
+    color: #667eea;
+  }
+
+  .blog-badge {
+    padding: 0.25rem 0.625rem;
+    background: #f0f9ff;
+    color: #3b82f6;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 1rem;
+  }
+
+  .blog-excerpt {
+    color: #6b7280;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .blog-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    margin-top: auto;
+  }
+
+  .blog-card-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    gap: 1rem;
+  }
+
+  .btn-outline {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+  }
+
+  .btn-outline:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+  }
+
+  .badge {
+    padding: 0.25rem 0.625rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .badge-success {
+    background: #f0f9ff;
+    color: #3b82f6;
+  }
+
+  .badge-warning {
+    background: #fffbeb;
+    color: #f59e0b;
+  }
+
+  .badge-secondary {
+    background: #f9fafb;
+    color: #6b7280;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+
+  .empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+
+  .empty-state h4 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+
+  .btn, .btn-link {
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  .btn-primary {
+    background: #667eea;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #5568d3;
+  }
+
+  .btn-link {
+    background: none;
+    padding: 0;
+    color: #667eea;
+    font-size: 0.875rem;
+  }
+
+  .btn-link:hover {
+    color: #5568d3;
+  }
+
+  .btn-link.text-danger {
+    color: #ef4444;
+  }
+
+  .btn-link.text-danger:hover {
+    color: #dc2626;
+  }
+</style>
