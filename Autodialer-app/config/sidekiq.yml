@@ -1,0 +1,20 @@
+---
+:concurrency: 5
+:timeout: 25
+:verbose: false
+:queues:
+  - default
+  - mailers
+
+# Production settings
+production:
+  :concurrency: 10
+
+# Development settings
+development:
+  :concurrency: 3
+
+# Set Redis connection
+:redis:
+  url: <%= ENV.fetch("REDIS_URL", "redis://localhost:6379/0") %>
+  network_timeout: 5
