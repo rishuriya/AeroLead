@@ -1,4 +1,4 @@
-# AeroLead - Multi-Feature Marketing Automation Platform
+# ScaleScribe - Multi-Feature Marketing Automation Platform
 
 <div align="center">
 
@@ -32,7 +32,7 @@
 
 ## 🎯 What It Does
 
-AeroLead is a unified marketing automation platform that solves three critical business needs:
+ScaleScribe is a unified marketing automation platform that solves three critical business needs:
 
 ### 1. **Automated Phone Calling (Autodialer)**
 Make bulk automated phone calls with custom voice messages. Upload CSV files with hundreds of phone numbers and send personalized messages to all contacts simultaneously. Perfect for:
@@ -105,7 +105,7 @@ This is the most sophisticated feature, using a **hybrid approach** that balance
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         AeroLead Platform                        │
+│                         ScaleScribe Platform                        │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                   │
 │  ┌─────────────────┐    ┌──────────────────┐   ┌─────────────┐ │
@@ -307,7 +307,7 @@ If hierarchy is lost, Gemini can't properly associate job descriptions with posi
 ## 📁 Project Structure
 
 ```
-AeroLead/
+ScaleScribe/
 ├── Autodialer-app/              # Main Rails application
 │   ├── app/
 │   │   ├── controllers/         # HTTP request handlers
@@ -376,7 +376,7 @@ AeroLead/
 ```bash
 # Clone repository
 git clone <repository-url>
-cd AeroLead
+cd ScaleScribe
 
 # Navigate to main app
 cd Autodialer-app
@@ -788,6 +788,6 @@ This project is licensed under the MIT License.
 
 ---
 
-**Built with ❤️ for AeroLeads Technical Assessment**
+**Built with ❤️ for ScaleScribes Technical Assessment**
 
 *A comprehensive marketing automation platform powered by Ruby on Rails, Node.js, and AI.*

@@ -1,6 +1,6 @@
 # 🚀 Autodialer with AI Blog Generator & LinkedIn Scraper
 
-A comprehensive Ruby on Rails application that combines automated phone calling, AI-powered blog content generation, and LinkedIn profile scraping capabilities. Built for AeroLeads Technical Assessment.
+A comprehensive Ruby on Rails application that combines automated phone calling, AI-powered blog content generation, and LinkedIn profile scraping capabilities. Built for ScaleScribes Technical Assessment.
 
 [![Ruby on Rails](https://img.shields.io/badge/Ruby_on_Rails-7.1-CC0000?style=flat&logo=ruby-on-rails)](https://rubyonrails.org/)
 [![Ruby Version](https://img.shields.io/badge/Ruby-3.4.1-red?style=flat&logo=ruby)](https://www.ruby-lang.org/)
@@ -690,7 +690,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for AeroLeads Technical Assessment**
+**Built with ❤️ for ScaleScribes Technical Assessment**
 
 **Version:** 1.0.1
 **Last Updated:** November 2025

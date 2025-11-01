@@ -1,6 +1,6 @@
-# AeroLead Deployment Guide
+# ScaleScribe Deployment Guide
 
-Complete guide for building, pushing, deploying, and managing the AeroLead application across different platforms.
+Complete guide for building, pushing, deploying, and managing the ScaleScribe application across different platforms.
 
 ## Table of Contents
 
