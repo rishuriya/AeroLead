@@ -4,6 +4,7 @@ services:
     name: autodialer-web
     runtime: ruby
     plan: free
+    rootDirectory: ./Autodialer-app
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec puma -C config/puma.rb"
     envVars:
@@ -19,19 +20,19 @@ services:
       - key: RAILS_ENV
         value: production
       - key: RAILS_MASTER_KEY
-        sync: false 
+        sync: false
       - key: TWILIO_ACCOUNT_SID
-        sync: false  
+        sync: false
       - key: TWILIO_AUTH_TOKEN
-        sync: false  
+        sync: false
       - key: TWILIO_PHONE_NUMBER
-        sync: false  
+        sync: false
       - key: GEMINI_API_KEY
-        sync: false  
+        sync: false
       - key: OPENAI_API_KEY
-        sync: false  
+        sync: false
       - key: LINKEDIN_SCRAPER_PATH
-        value: ../Linkedin-scrapper  
+        value: ./Linkedin-scrapper
       - key: NODE_COMMAND
         value: node
 
@@ -40,6 +41,7 @@ services:
     name: autodialer-sidekiq
     runtime: ruby
     plan: free
+    rootDirectory: ./Autodialer-app
     buildCommand: "./bin/render-build.sh"
     startCommand: "bundle exec sidekiq -C config/sidekiq.yml"
     envVars:
@@ -67,7 +69,7 @@ services:
       - key: OPENAI_API_KEY
         sync: false
       - key: LINKEDIN_SCRAPER_PATH
-        value: ../Linkedin-scrapper
+        value: ./Linkedin-scrapper
       - key: NODE_COMMAND
         value: node
 

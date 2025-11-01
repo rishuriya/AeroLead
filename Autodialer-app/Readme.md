@@ -1,610 +1,704 @@
-# Autodialer with AI Blog Generator
+# 🚀 Autodialer with AI Blog Generator & LinkedIn Scraper
 
-A Ruby on Rails application that combines automated phone dialing capabilities with an AI-powered blog content generation system. Built with modern AI integration and natural language processing.
+A comprehensive Ruby on Rails application that combines automated phone calling, AI-powered blog content generation, and LinkedIn profile scraping capabilities. Built for AeroLeads Technical Assessment.
 
-## 📋 Overview
+[![Ruby on Rails](https://img.shields.io/badge/Ruby_on_Rails-7.1-CC0000?style=flat&logo=ruby-on-rails)](https://rubyonrails.org/)
+[![Ruby Version](https://img.shields.io/badge/Ruby-3.4.1-red?style=flat&logo=ruby)](https://www.ruby-lang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
+[![Sidekiq](https://img.shields.io/badge/Sidekiq-7.0-B1003E?style=flat)](https://sidekiq.org/)
 
-This full-stack web application demonstrates two key capabilities:
-1. **Autodialer System**: Automated phone calling with AI voice integration and call analytics
-2. **AI Blog Generator**: Content creation system powered by AI APIs with natural language prompts
+## 📋 Table of Contents
 
-The project showcases integration with third-party APIs (Twilio, Gemini/ChatGPT), database management, and AI-driven automation.
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Prerequisites](#-prerequisites)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage](#-usage)
+- [API Documentation](#-api-documentation)
+- [Deployment](#-deployment)
+- [Architecture](#-architecture)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-## 🎯 Features
+---
 
-### Autodialer Module
-- ✅ **Bulk Phone Calling**: Upload and call up to 100 numbers automatically
-- ✅ **AI Natural Language Interface**: Command the system using conversational prompts
-- ✅ **Call Analytics**: Track call status (answered, failed, busy, no-answer)
-- ✅ **AI Voice Integration**: Text-to-speech for automated voice messages
-- ✅ **Twilio Integration**: Professional telephony API integration
-- ✅ **Real-time Logs**: Monitor call progress in real-time
-- ✅ **CSV Upload**: Easy bulk number import
-- ✅ **Indian Phone Support**: Optimized for Indian phone number formats
+## ✨ Features
 
-### Blog Generator Module
-- ✅ **AI-Powered Content**: Generate articles using Gemini/ChatGPT APIs
-- ✅ **Bulk Generation**: Create multiple articles from a single prompt
-- ✅ **Natural Language Input**: Describe what you want, AI handles the rest
-- ✅ **Clean Blog Interface**: Professional article display with formatting
-- ✅ **SEO-Friendly URLs**: Slug-based article routing
-- ✅ **Markdown Support**: Rich text formatting for articles
-- ✅ **Programming Topics**: Pre-configured for technical content generation
+### 📞 1. Automated Phone Calling (Autodialer)
 
-## 🔧 Technology Stack
+Make automated phone calls with custom messages using Twilio API.
+
+**Key Features:**
+- **Bulk Calling:** Upload CSV files or paste multiple phone numbers
+- **Custom Messages:** Set personalized voice messages for each campaign
+- **Real-time Status Tracking:** Monitor call status (Queued, Ringing, Completed, Failed)
+- **Retry Logic:** Automatic retry for failed calls
+- **Analytics Dashboard:** View success rates, call duration, and detailed logs
+- **Webhook Integration:** Real-time updates via Twilio webhooks
+- **Call Logs:** Comprehensive history with filters and search
+- **Background Processing:** Asynchronous job processing with Sidekiq
+
+**Supported Call Statuses:**
+- Queued
+- Ringing
+- In-Progress
+- Completed
+- Failed
+- Busy
+- No Answer
+- Canceled
+
+### ✍️ 2. AI-Powered Blog Generator
+
+Generate high-quality blog content using AI models (Gemini, OpenAI, Anthropic).
+
+**Key Features:**
+- **Multiple AI Models:** Gemini (primary), OpenAI GPT, Anthropic Claude
+- **Bulk Generation:** Generate up to 20 articles simultaneously
+- **Customizable Word Count:** 300-3000 words per article
+- **Context-Aware:** Add custom context for more relevant content
+- **Auto-SEO Optimization:** Automatic excerpt generation and meta descriptions
+- **Status Management:** Draft, Published, Archived workflows
+- **Reading Time Calculation:** Automatic reading time estimation
+- **Slug Generation:** SEO-friendly URL slugs
+- **Background Jobs:** AI generation runs asynchronously via Sidekiq
+
+**Supported AI Models:**
+- Google Gemini 2.5 Flash (default)
+- OpenAI GPT-4/GPT-3.5
+- Anthropic Claude (optional)
+
+### 🔍 3. LinkedIn Profile Scraper
+
+Scrape LinkedIn profiles to extract professional information using Puppeteer.
+
+**Key Features:**
+- **Bulk Scraping:** Process multiple LinkedIn profiles simultaneously
+- **AI-Powered Extraction:** Uses Gemini AI to parse profile content
+- **Cookie Persistence:** Maintains login sessions across scrapes
+- **Batch Processing:** Efficient batch scraping with single browser instance
+- **Real-time Updates:** Live status updates during scraping
+- **Retry Mechanism:** Automatic retry for failed profiles
+- **Detailed Data Extraction:**
+  - Full name and headline
+  - Current position and company
+  - Location and about section
+  - Complete work experience history
+  - Education background
+  - Skills (all skills + top skills)
+  - Contact information (when available)
+  - Profile image URL
+  - Connections count
+  - Pronouns
+
+**Scraping Methods:**
+- Single URL input
+- Bulk paste (multiple URLs)
+- CSV file upload
+
+**Status Tracking:**
+- Pending
+- Scraping
+- Completed
+- Failed (with error messages)
+
+### 📊 4. Analytics & Reporting
+
+Comprehensive analytics across all features.
+
+**Available Metrics:**
+- **Phone Calls:** Success rate, total calls, pending, completed, failed
+- **Blog Posts:** Total articles, published, drafts, archived
+- **LinkedIn Profiles:** Success rate, total scraped, pending, completed
+- **Time-based Analysis:** Daily, weekly, monthly trends
+- **Performance Metrics:** Average call duration, scraping time, generation time
+
+### 🎨 5. Modern UI/UX
+
+Beautiful, responsive interface with real-time updates.
+
+**UI Features:**
+- **Responsive Design:** Works on desktop, tablet, and mobile
+- **Real-time Polling:** Auto-refresh when jobs are active
+- **Smart Polling:** Doesn't interrupt user input
+- **Modern Styling:** Clean, professional design with Bootstrap 5
+- **Status Badges:** Color-coded status indicators
+- **Loading States:** User feedback during operations
+- **Flash Messages:** Success/error notifications
+
+---
+
+## 🛠 Tech Stack
 
 ### Backend
-- **Ruby on Rails 7.1**: Web application framework
-- **PostgreSQL**: Primary database
-- **Sidekiq**: Background job processing (optional)
-- **Redis**: Caching and job queue (optional)
+- **Ruby on Rails 7.1** - Web application framework
+- **Ruby 3.4.1** - Programming language
+- **PostgreSQL 15** - Primary database
+- **Redis 7** - Cache & Sidekiq queue storage
+- **Sidekiq 7** - Background job processing
 
 ### Frontend
-- **Bootstrap 5**: Responsive UI framework
-- **JavaScript (Stimulus)**: Frontend interactivity
-- **Turbo**: SPA-like navigation without full page reloads
+- **Bootstrap 5** - CSS framework
+- **JavaScript (Vanilla)** - Client-side interactions
+- **jQuery 3.7** - DOM manipulation
+- **Turbo Rails** - SPA-like navigation
+- **Stimulus** - JavaScript framework
 
 ### APIs & Services
-- **Twilio API**: Phone calling and voice
-- **Google Gemini API**: AI content generation (primary)
-- **OpenAI ChatGPT API**: Alternative AI provider
-- **Anthropic Claude API**: Natural language processing for prompts
+- **Twilio API** - Phone calling service
+- **Google Gemini AI** - Content generation & profile parsing
+- **OpenAI API** - Alternative AI model (optional)
+- **Anthropic Claude** - Alternative AI model (optional)
+
+### Scraping & Automation
+- **Puppeteer (Node.js)** - Headless browser for LinkedIn scraping
+- **Chrome/Chromium** - Browser engine
 
 ### Development Tools
-- **Cursor/Claude Code**: AI-assisted development
-- **RSpec**: Testing framework
-- **Rubocop**: Code quality and linting
+- **RuboCop** - Ruby code linter
+- **Brakeman** - Security scanner
+- **Kaminari** - Pagination
+- **Phonelib** - Phone number validation
+- **Faraday** - HTTP client
 
-## 📦 Installation
+---
 
-### Prerequisites
+## 📦 Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+### Required
+- **Ruby 3.4.1** ([Install Ruby](https://www.ruby-lang.org/en/documentation/installation/))
+- **Rails 7.1+** (`gem install rails`)
+- **PostgreSQL 15+** ([Install PostgreSQL](https://www.postgresql.org/download/))
+- **Redis 7+** ([Install Redis](https://redis.io/download))
+- **Node.js 18+** ([Install Node.js](https://nodejs.org/))
+- **Bundler** (`gem install bundler`)
+
+### For LinkedIn Scraping (Optional)
+- **Chrome/Chromium browser**
+- **npm/yarn** for Puppeteer dependencies
+
+### API Keys Required
+- **Twilio Account** ([Sign up](https://www.twilio.com/try-twilio))
+  - Account SID
+  - Auth Token
+  - Twilio Phone Number
+- **Google Gemini API Key** ([Get API Key](https://makersuite.google.com/app/apikey))
+- **OpenAI API Key** (optional) ([Get API Key](https://platform.openai.com/api-keys))
+
+---
+
+## 🚀 Installation
+
+### 1. Clone the Repository
+
 ```bash
-# Ruby version
-ruby 3.2.0 or higher
-
-# Rails version
-rails 7.1.0 or higher
-
-# PostgreSQL
-psql --version
-
-# Node.js & Yarn (for asset compilation)
-node --version
-yarn --version
-```
-
-### Environment Setup
-
-1. **Clone the repository**
-```bash
-git clone <repository-url>
+git clone https://github.com/yourusername/autodialer-app.git
 cd autodialer-app
 ```
 
-2. **Install dependencies**
+### 2. Install Dependencies
+
 ```bash
+# Install Ruby gems
 bundle install
+
+# Install Node packages (for asset compilation)
+npm install
+# or
 yarn install
 ```
 
-3. **Configure environment variables**
+### 3. Set Up LinkedIn Scraper (Optional)
 
-Create `.env` file in root directory:
 ```bash
-# Twilio Configuration
-TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_auth_token
-TWILIO_PHONE_NUMBER=your_twilio_number
+cd ../Linkedin-scrapper
+npm install
+cd ../Autodialer-app
+```
 
-# AI API Keys
+### 4. Configure Database
+
+```bash
+# Create database
+rails db:create
+
+# Run migrations
+rails db:migrate
+
+# Optional: Seed sample data
+rails db:seed
+```
+
+### 5. Set Up Environment Variables
+
+Copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your credentials:
+
+```bash
+# Twilio
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_PHONE_NUMBER=+1234567890
+
+# Gemini AI
 GEMINI_API_KEY=your_gemini_api_key
-OPENAI_API_KEY=your_openai_api_key
-ANTHROPIC_API_KEY=your_anthropic_api_key
 
 # Database
 DATABASE_URL=postgresql://localhost/autodialer_development
 
-# Rails Configuration
-RAILS_ENV=development
-SECRET_KEY_BASE=your_secret_key
+# Redis
+REDIS_URL=redis://localhost:6379/0
+
+# Rails
+RAILS_MASTER_KEY=df1b1c9524505387d155a55e2dc16883
 ```
 
-4. **Setup database**
-```bash
-rails db:create
-rails db:migrate
-rails db:seed  # Optional: loads sample data
-```
+### 6. Start the Application
 
-5. **Start the server**
+**Option A: All services together**
+
 ```bash
+# Terminal 1: Rails server
 rails server
-# Visit http://localhost:3000
+
+# Terminal 2: Sidekiq worker
+bundle exec sidekiq
+
+# Terminal 3: Redis (if not running as service)
+redis-server
 ```
 
-## 🚀 Usage
-
-### Autodialer System
-
-#### 1. Manual Phone Number Entry
-```
-1. Navigate to /autodialer
-2. Paste phone numbers (one per line)
-3. Click "Start Calling"
-4. Monitor real-time call status
-```
-
-#### 2. CSV Upload
-```
-1. Prepare CSV file with 'phone_number' column
-2. Upload via /autodialer/upload
-3. Review numbers and initiate calls
-```
-
-#### 3. AI Natural Language Commands
-```
-Examples:
-- "Call +91-9876543210 and leave a message about our new product"
-- "Make calls to all numbers in the pending list"
-- "Call the first 10 numbers with a reminder about the meeting"
-
-How it works:
-1. Type command in AI prompt box
-2. System parses intent using Claude API
-3. Executes appropriate autodialer action
-4. Returns confirmation and results
-```
-
-### Blog Generator System
-
-#### 1. Generate Articles via AI Prompt
-
-Navigate to `/blog/new` or `/admin/generate-blog`
-
-**Example Prompts:**
-```
-Generate 10 articles on:
-1. Ruby on Rails Best Practices 2024
-2. Understanding PostgreSQL Indexes
-3. Docker Container Optimization
-4. RESTful API Design Principles
-5. Test-Driven Development with RSpec
-6. Rails Security Best Practices
-7. Scaling Ruby Applications
-8. GraphQL vs REST APIs
-9. Microservices Architecture in Rails
-10. CI/CD Pipeline Setup for Rails
-```
-
-**Or use natural language:**
-```
-"Create a series of beginner-friendly articles about web development 
-covering HTML, CSS, JavaScript, React, and Node.js basics"
-```
-
-#### 2. View Generated Blogs
-
-Navigate to `/blog` to see all published articles:
-- Article listing with titles and excerpts
-- Click to read full content
-- Share functionality
-- Search and filter options
-
-## 📊 Database Schema
-
-### Phone Calls Table
-```ruby
-create_table "phone_calls" do |t|
-  t.string "phone_number", null: false
-  t.string "call_sid"
-  t.string "status"  # queued, ringing, in-progress, completed, failed
-  t.string "duration"
-  t.text "message"
-  t.datetime "called_at"
-  t.timestamps
-end
-```
-
-### Blog Posts Table
-```ruby
-create_table "blog_posts" do |t|
-  t.string "title", null: false
-  t.string "slug", null: false
-  t.text "content", null: false
-  t.text "excerpt"
-  t.string "ai_model"  # gemini, chatgpt, etc.
-  t.string "status", default: "draft"
-  t.datetime "published_at"
-  t.timestamps
-end
-```
-
-## 🏗️ Application Architecture
-
-```
-app/
-├── controllers/
-│   ├── autodialer_controller.rb      # Handles phone call operations
-│   ├── blog_posts_controller.rb      # Blog CRUD operations
-│   └── ai_commands_controller.rb     # Processes AI natural language commands
-│
-├── models/
-│   ├── phone_call.rb                 # Call data and validations
-│   ├── blog_post.rb                  # Article data and slug generation
-│   └── ai_processor.rb               # AI API integration logic
-│
-├── services/
-│   ├── twilio_service.rb             # Twilio API wrapper
-│   ├── gemini_service.rb             # Google Gemini integration
-│   ├── openai_service.rb             # ChatGPT integration
-│   └── ai_command_parser.rb          # Natural language processing
-│
-├── jobs/
-│   ├── phone_call_job.rb             # Background calling
-│   └── blog_generation_job.rb        # Background content generation
-│
-└── views/
-    ├── autodialer/
-    │   ├── index.html.erb            # Main dialer interface
-    │   └── logs.html.erb             # Call logs and analytics
-    └── blog_posts/
-        ├── index.html.erb            # Blog listing
-        ├── show.html.erb             # Individual article
-        └── new.html.erb              # AI generation interface
-```
-
-## 🔌 API Integration Details
-
-### Twilio Integration
-
-```ruby
-# services/twilio_service.rb
-class TwilioService
-  def initialize
-    @client = Twilio::REST::Client.new(
-      ENV['TWILIO_ACCOUNT_SID'],
-      ENV['TWILIO_AUTH_TOKEN']
-    )
-  end
-
-  def make_call(to_number, message)
-    @client.calls.create(
-      from: ENV['TWILIO_PHONE_NUMBER'],
-      to: to_number,
-      twiml: generate_twiml(message)
-    )
-  end
-
-  def generate_twiml(message)
-    "<Response><Say voice='Polly.Aditi'>#{message}</Say></Response>"
-  end
-end
-```
-
-### Gemini AI Integration
-
-```ruby
-# services/gemini_service.rb
-class GeminiService
-  def generate_article(title, context = nil)
-    prompt = build_prompt(title, context)
-    
-    response = HTTP.post(
-      "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent",
-      json: { contents: [{ parts: [{ text: prompt }] }] },
-      headers: { "x-goog-api-key" => ENV['GEMINI_API_KEY'] }
-    )
-    
-    parse_response(response)
-  end
-
-  private
-
-  def build_prompt(title, context)
-    """
-    Write a comprehensive, SEO-optimized blog article on: #{title}
-    
-    #{context if context.present?}
-    
-    Requirements:
-    - 800-1200 words
-    - Include introduction, main sections, and conclusion
-    - Use markdown formatting
-    - Include code examples where relevant
-    - Make it beginner-friendly yet informative
-    """
-  end
-end
-```
-
-### AI Command Processing
-
-```ruby
-# services/ai_command_parser.rb
-class AiCommandParser
-  def parse(command)
-    response = Anthropic::Client.new.messages.create(
-      model: "claude-sonnet-4-5-20250929",
-      messages: [{ 
-        role: "user", 
-        content: parse_prompt(command) 
-      }]
-    )
-    
-    extract_action(response)
-  end
-
-  private
-
-  def parse_prompt(command)
-    """
-    Parse this autodialer command and return structured JSON:
-    Command: "#{command}"
-    
-    Return format:
-    {
-      "action": "make_call|upload_numbers|check_status",
-      "phone_numbers": ["array of numbers if applicable"],
-      "message": "message to deliver if applicable",
-      "parameters": {}
-    }
-    """
-  end
-end
-```
-
-## 📈 Features Demonstration
-
-### 1. Autodialer Dashboard
-- Real-time call statistics
-- Success rate visualization
-- Call duration analytics
-- Failed call retry mechanism
-
-### 2. AI Prompt Interface
-- Natural language input box
-- Command history
-- Suggested commands
-- Real-time processing feedback
-
-### 3. Blog Management
-- Article listing with search
-- Draft/Published status
-- Edit and delete capabilities
-- Preview before publishing
-
-## 🧪 Testing
+**Option B: Using Procfile (Foreman)**
 
 ```bash
-# Run all tests
-bundle exec rspec
-
-# Test specific modules
-bundle exec rspec spec/services/twilio_service_spec.rb
-bundle exec rspec spec/services/gemini_service_spec.rb
-
-# Run with coverage
-COVERAGE=true bundle exec rspec
+gem install foreman
+foreman start
 ```
 
-### Sample Tests
-```ruby
-# spec/services/twilio_service_spec.rb
-RSpec.describe TwilioService do
-  describe '#make_call' do
-    it 'creates a call with correct parameters' do
-      service = TwilioService.new
-      result = service.make_call('+919876543210', 'Test message')
-      
-      expect(result.status).to eq('queued')
-      expect(result.to).to eq('+919876543210')
-    end
-  end
-end
+### 7. Access the Application
+
+Open your browser and navigate to:
+```
+http://localhost:3000
 ```
 
-## 🚀 Deployment
+---
 
-### Hosting Options
+## ⚙️ Configuration
 
-**1. Railway.app** (Recommended)
+### Environment Variables
+
+All configuration is done via environment variables. See `.env.example` for a complete list.
+
+#### Required Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `TWILIO_ACCOUNT_SID` | Twilio Account SID | `ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` |
+| `TWILIO_AUTH_TOKEN` | Twilio Auth Token | `your_auth_token` |
+| `TWILIO_PHONE_NUMBER` | Your Twilio phone number | `+15551234567` |
+| `GEMINI_API_KEY` | Google Gemini API key | `AIzaSyXXXXXXXXXXXXXXXXXXXXXXXXXX` |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://localhost/db_name` |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379/0` |
+
+#### Optional Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | OpenAI API key | - |
+| `ANTHROPIC_API_KEY` | Anthropic API key | - |
+| `LINKEDIN_SCRAPER_PATH` | Path to scraper directory | `../Linkedin-scrapper` |
+| `MAX_PHONE_NUMBERS_PER_BATCH` | Max numbers per batch | `100` |
+| `MAX_BULK_ARTICLES` | Max articles per generation | `20` |
+| `WEB_CONCURRENCY` | Puma workers | `2` |
+| `RAILS_MAX_THREADS` | Puma threads | `5` |
+
+### Twilio Webhooks
+
+Configure these webhook URLs in your Twilio console:
+
+- **Status Callback:** `https://your-domain.com/webhooks/twilio/status`
+- **Voice Callback:** `https://your-domain.com/webhooks/twilio/voice`
+
+### LinkedIn Scraper Setup
+
+1. Navigate to scraper directory:
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
-
-# Login and deploy
-railway login
-railway init
-railway up
+cd ../Linkedin-scrapper
 ```
 
-**2. Render.com**
+2. Install dependencies:
 ```bash
-# Connect GitHub repo
-# Configure environment variables
-# Deploy automatically on push
+npm install
 ```
 
-**3. Fly.io**
+3. First-time login (saves cookies):
 ```bash
-# Install Fly CLI
-curl -L https://fly.io/install.sh | sh
-
-# Launch app
-fly launch
-fly deploy
+node puppeteer_scraper.js login
 ```
 
-### Production Environment Variables
+4. Test scraping:
 ```bash
-# Set in hosting platform dashboard
-RAILS_ENV=production
-SECRET_KEY_BASE=<generated-secret>
-DATABASE_URL=<postgres-url>
-TWILIO_ACCOUNT_SID=<production-sid>
-TWILIO_AUTH_TOKEN=<production-token>
-GEMINI_API_KEY=<api-key>
+node puppeteer_scraper.js scrape https://www.linkedin.com/in/example
 ```
 
-## 📚 API Endpoints
+---
 
-### Autodialer API
-```
-POST   /api/v1/calls              # Create new call
-GET    /api/v1/calls              # List all calls
-GET    /api/v1/calls/:id          # Get call details
-POST   /api/v1/calls/bulk         # Bulk call creation
-DELETE /api/v1/calls/:id          # Cancel call
-POST   /api/v1/ai/command         # Natural language command
-```
+## 📖 Usage
 
-### Blog API
-```
-GET    /api/v1/blog_posts         # List articles
-POST   /api/v1/blog_posts         # Create article
-GET    /api/v1/blog_posts/:slug   # Get specific article
-PUT    /api/v1/blog_posts/:slug   # Update article
-DELETE /api/v1/blog_posts/:slug   # Delete article
-POST   /api/v1/blog_posts/generate # AI generation endpoint
-```
+### 1. Autodialer - Making Phone Calls
 
-## ⚠️ Important Notes
+#### Via Web Interface
 
-### Testing Guidelines
-- **NEVER call real phone numbers during testing**
-- Use Twilio test numbers: 1-800-XXX-XXXX format
-- Test with toll-free numbers or verified test numbers
-- Monitor Twilio usage to avoid unexpected charges
+1. Navigate to **Autodialer** page
+2. Choose input method:
+   - **Manual Entry:** Paste phone numbers (one per line)
+   - **CSV Upload:** Upload a CSV file with `phone_number` column
+3. Enter your message (max 500 characters)
+4. Click **"Start Calling"**
+5. Monitor progress in **Call Logs**
 
-### Rate Limits
-- **Twilio**: Varies by account type (check dashboard)
-- **Gemini API**: 60 requests/minute (free tier)
-- **ChatGPT API**: Depends on tier
-- Implement exponential backoff for API calls
+#### Via API
 
-### Security Considerations
-- API keys stored in environment variables
-- Never commit `.env` file to repository
-- Implement rate limiting on endpoints
-- Validate phone numbers before calling
-- Sanitize user inputs for AI prompts
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Twilio Authentication Error**
 ```bash
-# Verify credentials
+# Make a single call
+curl -X POST http://localhost:3000/api/v1/phone_calls \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_number": "+15551234567",
+    "message": "This is a test call"
+  }'
+
+# Bulk calls
+curl -X POST http://localhost:3000/api/v1/phone_calls/bulk_create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone_numbers": ["+15551234567", "+15557654321"],
+    "message": "Bulk test call"
+  }'
+```
+
+### 2. Blog Generator - Creating AI Content
+
+#### Via Web Interface
+
+1. Navigate to **Generate Blog** page
+2. Enter blog titles (one per line)
+3. Set word count (300-3000 words)
+4. Add optional context
+5. Click **"Generate Articles"**
+6. View generated posts in **Blog Posts** page
+
+#### Via API
+
+```bash
+# Generate a single blog post
+curl -X POST http://localhost:3000/api/v1/blog_posts/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "10 Benefits of Daily Exercise",
+    "word_count": 1000,
+    "context": "Focus on mental health benefits"
+  }'
+
+# Get all blog posts
+curl http://localhost:3000/api/v1/blog_posts
+```
+
+### 3. LinkedIn Scraper - Extracting Profiles
+
+#### Via Web Interface
+
+1. Navigate to **LinkedIn Scraper** page
+2. Click **"Add LinkedIn Profiles"**
+3. Choose input method:
+   - **Single URL:** Enter one profile URL
+   - **Bulk Paste:** Multiple URLs (one per line)
+   - **CSV Upload:** Upload file with URLs
+4. Click **"Start Scraping"**
+5. Monitor progress in **LinkedIn Profiles** page
+
+#### Via Command Line
+
+```bash
+# Scrape a single profile
+cd ../Linkedin-scrapper
+node puppeteer_scraper.js scrape https://www.linkedin.com/in/example
+
+# Scrape multiple profiles
+node puppeteer_scraper.js scrape https://linkedin.com/in/profile1 https://linkedin.com/in/profile2
+```
+
+#### Via Rails Console
+
+```bash
 rails console
-> TwilioService.new.client.api.accounts.list
+
+# Queue a profile for scraping
+profile = LinkedinProfile.create!(profile_url: "https://www.linkedin.com/in/example")
+BatchLinkedinScrapingJob.perform_later([profile.id])
+
+# Check status
+profile.reload.status # => "pending", "scraping", "completed", or "failed"
+
+# View scraped data
+profile.name
+profile.headline
+profile.experience_list
 ```
 
-**AI API Rate Limits**
-```ruby
-# Implement retry logic
-def with_retry(max_attempts = 3)
-  attempts = 0
-  begin
-    yield
-  rescue RateLimitError => e
-    attempts += 1
-    raise if attempts >= max_attempts
-    sleep(2 ** attempts)
-    retry
-  end
-end
+### 4. Monitoring Background Jobs
+
+Access the Sidekiq dashboard:
+
+```
+http://localhost:3000/sidekiq
 ```
 
-**Database Connection Issues**
-```bash
-# Reset database
-rails db:reset
-rails db:migrate
+Features:
+- View active jobs
+- Monitor queue sizes
+- Retry failed jobs
+- View job history
+
+---
+
+## 🔌 API Documentation
+
+### Base URL
+```
+http://localhost:3000/api/v1
 ```
 
-## 📖 Documentation
+### Authentication
+Currently, the API is unauthenticated. Add authentication for production use.
 
-### Code Documentation
-- YARD documentation available at `/docs`
-- Generate with: `yard doc`
-- View: `yard server`
+### Endpoints
 
-### API Documentation
-- Swagger UI available at `/api-docs`
-- Postman collection in `/docs/postman`
+#### Phone Calls
 
-## 🎓 Learning Resources
+##### Get All Calls
+```http
+GET /api/v1/phone_calls
+```
 
-This project demonstrates:
-- Rails API development
-- Third-party API integration
-- Background job processing
-- AI/ML integration in web apps
-- Natural language processing
-- Telephony system integration
-- Content management systems
-- Modern Rails best practices
+**Response:**
+```json
+{
+  "phone_calls": [
+    {
+      "id": 1,
+      "phone_number": "+15551234567",
+      "status": "completed",
+      "message": "Test call",
+      "duration": 45,
+      "called_at": "2025-11-01T10:30:00Z"
+    }
+  ]
+}
+```
 
-## 👥 Contributing
+##### Create Call
+```http
+POST /api/v1/phone_calls
+Content-Type: application/json
 
-This is an assessment project, but suggestions are welcome:
+{
+  "phone_number": "+15551234567",
+  "message": "Your custom message here"
+}
+```
+
+##### Bulk Create Calls
+```http
+POST /api/v1/phone_calls/bulk_create
+Content-Type: application/json
+
+{
+  "phone_numbers": ["+15551234567", "+15557654321"],
+  "message": "Bulk message"
+}
+```
+
+#### Blog Posts
+
+##### Get All Posts
+```http
+GET /api/v1/blog_posts
+```
+
+##### Get Single Post
+```http
+GET /api/v1/blog_posts/:slug
+```
+
+##### Generate Post
+```http
+POST /api/v1/blog_posts/generate
+Content-Type: application/json
+
+{
+  "title": "Your Blog Title",
+  "word_count": 1000,
+  "context": "Optional context"
+}
+```
+
+##### Update Post
+```http
+PUT /api/v1/blog_posts/:slug
+Content-Type: application/json
+
+{
+  "title": "Updated Title",
+  "content": "Updated content",
+  "status": "published"
+}
+```
+
+##### Delete Post
+```http
+DELETE /api/v1/blog_posts/:slug
+```
+
+## 🏗 Architecture
+
+### Application Structure
+
+```
+autodialer-app/
+├── app/
+│   ├── controllers/       # Request handlers
+│   ├── models/           # Business logic & database
+│   ├── jobs/             # Background jobs (Sidekiq)
+│   ├── services/         # External API integrations
+│   ├── views/            # HTML templates
+│   └── helpers/          # View helpers
+├── config/
+│   ├── routes.rb         # URL routing
+│   ├── database.yml      # Database config
+│   ├── sidekiq.yml       # Background jobs config
+│   └── puma.rb           # Web server config
+├── db/
+│   ├── migrate/          # Database migrations
+│   └── schema.rb         # Database schema
+└── bin/                  # Executable scripts
+```
+
+### Data Flow
+
+#### Phone Calling Flow
+```
+User Input → Controller → PhoneCall Model → TwilioJob (Sidekiq)
+→ Twilio API → Make Call → Webhook → Update Status → UI Polling
+```
+
+#### Blog Generation Flow
+```
+User Input → Controller → BlogGenerationJob (Sidekiq)
+→ GeminiService → AI API → Parse Response → BlogPost Model → UI Polling
+```
+
+#### LinkedIn Scraping Flow
+```
+User Input → Controller → LinkedinProfile Model → BatchLinkedinScrapingJob
+→ LinkedinScraperService → Puppeteer Script → Gemini AI (parsing)
+→ Update Model → UI Polling
+```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
 1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+---
+
+## 🔒 Security
+
+### Important Notes
+
+- **Never commit API keys** to version control
+- Use environment variables for all secrets
+- Enable 2FA on Twilio account
+- Implement rate limiting for production
+- Add authentication to API endpoints
+- Sanitize user input
+- Use HTTPS in production
+
+---
 
 ## 📄 License
 
-Created for AeroLeads technical assessment. Educational use only.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
-
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- Email: your.email@example.com
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
+---
 
 ## 🙏 Acknowledgments
 
-- Built using AI-assisted development (Cursor, Claude Code)
-- Twilio for telephony infrastructure
-- Google Gemini for AI content generation
-- AeroLeads team for the opportunity
-- Ruby on Rails community
-
-## 📞 Support
-
-For issues or questions:
-- Create an issue in the repository
-- Contact: your.email@example.com
-- WhatsApp: [As per assignment requirements]
+- **Twilio** - Phone calling API
+- **Google Gemini** - AI content generation
+- **OpenAI** - Alternative AI model
+- **Puppeteer** - Web scraping automation
+- **Rails Community** - Framework and gems
+- **Bootstrap** - UI components
 
 ---
 
-## 🎯 Assignment Completion Checklist
+## 🗺 Roadmap
 
-- [x] Ruby on Rails app created
-- [x] Autodialer with bulk calling
-- [x] AI natural language interface for calls
-- [x] Call logging and analytics
-- [x] Blog post generation with AI
-- [x] AI prompt interface for blog generation
-- [x] 10 sample articles generated
-- [x] Clean, professional UI
-- [x] Deployed to live hosting
-- [x] GitHub repository public
-- [x] Comprehensive README documentation
-- [x] Video demonstration prepared
+### Planned Features
+
+- [ ] User authentication & authorization
+- [ ] Email integration (SendGrid)
+- [ ] SMS messaging support
+- [ ] Advanced analytics dashboard
+- [ ] Export data to CSV/Excel
+- [ ] API rate limiting
+- [ ] Webhook management UI
+- [ ] Multi-language support
+- [ ] Dark mode
+- [ ] Mobile app (React Native)
+
+### Completed
+
+- [x] Automated phone calling
+- [x] AI blog generation
+- [x] LinkedIn profile scraping
+- [x] Background job processing
+- [x] Call analytics
+- [x] Deployment configuration
+- [x] API endpoints
 
 ---
 
-**Built with ❤️ using Ruby on Rails and AI tools**
+**Built with ❤️ for AeroLeads Technical Assessment**
 
-**Time to complete**: ~3-4 hours (as recommended)
-**AI Tools used**: Cursor, Claude Code, ChatGPT
-**Lines of code**: ~2,000
-**Test coverage**: 85%+
+**Version:** 1.0.1
+**Last Updated:** November 2025
+**Author:** Rishav Kumar
 
-*This project showcases practical AI integration, modern web development practices, and the ability to rapidly build full-featured applications using AI-assisted development tools.*
+---
+
+## Quick Links
+
+- [Installation Guide](#-installation)
+- [Contributing Guidelines](#-contributing)
+
+---
+
+*Made with Ruby on Rails, powered by AI* 🚀
