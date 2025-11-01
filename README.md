@@ -4,12 +4,12 @@
 
 [![Ruby on Rails](https://img.shields.io/badge/Ruby_on_Rails-7.1-CC0000?style=flat&logo=ruby-on-rails)](https://rubyonrails.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=flat&logo=node.js)](https://nodejs.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis)](https://redis.io/)
 
 **A comprehensive marketing automation platform combining automated phone calling, AI-powered blog generation, and intelligent LinkedIn profile scraping.**
 
-[Features](#-features) • [Architecture](#-architecture) • [How It Works](#-how-it-works) • [Setup](#-quick-start) • [Limitations](#-current-limitations) • [Roadmap](#-future-enhancements)
+🚀 **[Live Demo](https://autodialer-web-699583939041.us-central1.run.app/)** | [Features](#-features) • [Architecture](#-architecture) • [How It Works](#-how-it-works) • [Setup](#-quick-start) • [Limitations](#-current-limitations) • [Roadmap](#-future-enhancements)
 
 </div>
 
@@ -767,6 +767,15 @@ This project is licensed under the MIT License.
 
 **Version:** 1.0.0
 **Last Updated:** November 2024
+**Deployment:** 🚀 **[Live on Google Cloud Run](https://autodialer-web-699583939041.us-central1.run.app/)**
+
+### Production Deployment
+- **Platform:** Google Cloud Platform (GCP)
+- **Service:** Cloud Run (us-central1)
+- **Web URL:** https://autodialer-web-699583939041.us-central1.run.app/
+- **Database:** Cloud SQL (PostgreSQL 15)
+- **Cache:** Memorystore (Redis 7)
+- **Worker:** Cloud Run (Sidekiq with Puppeteer)
 
 ### Recent Changes
 - ✅ LinkedIn scraper integrated with hybrid approach
@@ -774,7 +783,8 @@ This project is licensed under the MIT License.
 - ✅ Cookie-based authentication implemented
 - ✅ Gemini Flash integration for AI parsing
 - ✅ Batch processing for all features
-- ✅ Deployed to Render.com
+- ✅ Deployed to Google Cloud Run
+- ✅ Production deployment with Cloud SQL and Memorystore
 
 ---
 
