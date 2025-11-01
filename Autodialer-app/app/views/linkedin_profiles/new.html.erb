@@ -1,0 +1,216 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h1 class="page-title">Add LinkedIn Profiles</h1>
+      <p class="page-subtitle">Add profiles to scrape using URL, bulk list, or AI agent</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Single URL Form -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Single Profile URL</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with model: @linkedin_profile, local: true do |f| %>
+            <div class="form-group">
+              <label for="profile_url" class="form-label">LinkedIn Profile URL</label>
+              <small class="text-muted d-block mb-2">Enter a single LinkedIn profile URL</small>
+              <%= f.text_field :profile_url,
+                  class: "form-control",
+                  placeholder: "https://linkedin.com/in/johndoe",
+                  required: true %>
+            </div>
+
+            <div class="form-actions mt-4">
+              <%= f.submit "Add Profile", class: "btn btn-primary w-100" %>
+            </div>
+          <% end %>
+
+          <div class="mt-4">
+            <p class="text-muted small mb-2">Example formats:</p>
+            <ul class="text-muted small">
+              <li>https://linkedin.com/in/johndoe</li>
+              <li>linkedin.com/in/johndoe</li>
+              <li>johndoe (auto-completes to full URL)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk URL List Form -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Bulk URL List</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: bulk_create_linkedin_profiles_path, method: :post, local: true do |f| %>
+            <div class="form-group">
+              <label for="urls" class="form-label">LinkedIn Profile URLs</label>
+              <small class="text-muted d-block mb-2">Enter one URL per line or comma-separated</small>
+              <%= text_area_tag :urls, nil,
+                  class: "form-control",
+                  rows: 10,
+                  placeholder: "https://linkedin.com/in/johndoe\nhttps://linkedin.com/in/janedoe\nhttps://linkedin.com/in/bobsmith",
+                  required: true %>
+            </div>
+
+            <div class="form-actions mt-4">
+              <%= button_tag type: "submit", class: "btn btn-primary w-100" do %>
+                Add All Profiles
+              <% end %>
+            </div>
+          <% end %>
+
+          <div class="mt-4">
+            <p class="text-muted small">Supports both newline and comma separation</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload CSV/Text File -->
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header">
+          <h3 class="card-title">Upload File</h3>
+        </div>
+        <div class="card-body">
+          <%= form_with url: upload_csv_linkedin_profiles_path, method: :post, local: true, multipart: true do |f| %>
+            <div class="form-group">
+              <label for="file" class="form-label">Select CSV or Text File</label>
+              <small class="text-muted d-block mb-2">
+                CSV: Must have 'url', 'profile_url', or 'linkedin_url' column<br>
+                Text: One URL per line
+              </small>
+              <%= file_field_tag :file,
+                  class: "form-control",
+                  accept: ".csv,.txt",
+                  required: true %>
+            </div>
+
+            <div class="form-actions mt-4">
+              <%= button_tag type: "submit", class: "btn btn-primary w-100" do %>
+                Upload & Add Profiles
+              <% end %>
+            </div>
+          <% end %>
+
+          <div class="mt-4">
+            <p class="text-muted small mb-2">Sample CSV format:</p>
+            <pre class="bg-light p-2 small">url
+https://linkedin.com/in/johndoe
+https://linkedin.com/in/janedoe</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI Agent Section -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">AI Agent - Natural Language Commands</h3>
+        </div>
+        <div class="card-body">
+          <p class="text-muted mb-3">
+            Use natural language to command the AI to scrape LinkedIn profiles.
+            The AI will understand your intent and extract the URLs automatically.
+          </p>
+
+          <div class="form-group">
+            <label for="ai_command" class="form-label">AI Command</label>
+            <textarea
+              id="ai_command"
+              class="form-control"
+              rows="3"
+              placeholder="Examples:
+- Scrape this LinkedIn profile: https://linkedin.com/in/johndoe
+- Get LinkedIn info for these profiles: linkedin.com/in/jane, linkedin.com/in/bob
+- Extract data from LinkedIn profiles: johndoe, janedoe, bobsmith"></textarea>
+          </div>
+
+          <div class="form-actions mt-3">
+            <button type="button" class="btn btn-primary" id="execute-ai-command">
+              Execute AI Command
+            </button>
+          </div>
+
+          <div id="ai-response" class="mt-3" style="display: none;">
+            <div class="alert" role="alert"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-12 text-center">
+      <%= link_to 'Back to LinkedIn Profiles', linkedin_profiles_path, class: 'btn btn-outline-secondary' %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const aiCommandInput = document.getElementById('ai_command');
+  const executeButton = document.getElementById('execute-ai-command');
+  const responseDiv = document.getElementById('ai-response');
+  const responseAlert = responseDiv.querySelector('.alert');
+
+  executeButton.addEventListener('click', async function() {
+    const command = aiCommandInput.value.trim();
+
+    if (!command) {
+      alert('Please enter an AI command');
+      return;
+    }
+
+    executeButton.disabled = true;
+    executeButton.textContent = 'Processing...';
+    responseDiv.style.display = 'none';
+
+    try {
+      const response = await fetch('/ai/command', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({ command: command })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        responseAlert.className = 'alert alert-success';
+        responseAlert.textContent = result.message || 'Command executed successfully!';
+
+        // Redirect to profiles page after 2 seconds
+        setTimeout(() => {
+          window.location.href = '/linkedin_profiles';
+        }, 2000);
+      } else {
+        responseAlert.className = 'alert alert-danger';
+        responseAlert.textContent = 'Error: ' + (result.error || 'Failed to execute command');
+      }
+
+      responseDiv.style.display = 'block';
+    } catch (error) {
+      responseAlert.className = 'alert alert-danger';
+      responseAlert.textContent = 'Error: ' + error.message;
+      responseDiv.style.display = 'block';
+    } finally {
+      executeButton.disabled = false;
+      executeButton.textContent = 'Execute AI Command';
+    }
+  });
+});
+</script>

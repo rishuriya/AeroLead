@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_10_31_000002) do
+ActiveRecord::Schema[7.1].define(version: 2025_11_01_082500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -30,6 +30,36 @@ ActiveRecord::Schema[7.1].define(version: 2025_10_31_000002) do
     t.index ["published_at"], name: "index_blog_posts_on_published_at"
     t.index ["slug"], name: "index_blog_posts_on_slug", unique: true
     t.index ["status"], name: "index_blog_posts_on_status"
+  end
+
+  create_table "linkedin_profiles", force: :cascade do |t|
+    t.string "profile_url", null: false
+    t.string "name"
+    t.string "headline"
+    t.string "location"
+    t.text "about"
+    t.string "current_company"
+    t.string "current_position"
+    t.text "all_experience", default: "[]"
+    t.string "education"
+    t.text "all_education", default: "[]"
+    t.text "top_skills"
+    t.text "all_skills"
+    t.integer "skills_count", default: 0
+    t.string "email"
+    t.string "phone"
+    t.string "website"
+    t.string "profile_image_url"
+    t.string "connections"
+    t.string "pronouns"
+    t.string "status", default: "pending"
+    t.datetime "scraped_at"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_linkedin_profiles_on_created_at"
+    t.index ["profile_url"], name: "index_linkedin_profiles_on_profile_url", unique: true
+    t.index ["status"], name: "index_linkedin_profiles_on_status"
   end
 
   create_table "phone_calls", force: :cascade do |t|

@@ -1,0 +1,156 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="page-title"><%= @linkedin_profile.name || 'LinkedIn Profile' %></h1>
+          <p class="page-subtitle">Profile scraped <%= time_ago_in_words(@linkedin_profile.scraped_at) %> ago</p>
+        </div>
+        <%= link_to 'Back to Profiles', linkedin_profiles_path, class: 'btn btn-outline-secondary' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Profile Card -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <% if @linkedin_profile.profile_image_url.present? %>
+            <img src="<%= @linkedin_profile.profile_image_url %>" alt="<%= @linkedin_profile.name %>" class="rounded-circle mb-3" style="width: 120px; height: 120px; object-fit: cover;">
+          <% else %>
+            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+              <span class="text-white" style="font-size: 48px;"><%= @linkedin_profile.name&.first || '?' %></span>
+            </div>
+          <% end %>
+
+          <h3><%= @linkedin_profile.name %></h3>
+          <p class="text-muted"><%= @linkedin_profile.headline %></p>
+
+          <div class="mt-3">
+            <% if @linkedin_profile.location.present? %>
+              <p class="mb-2"><strong>Location:</strong> <%= @linkedin_profile.location %></p>
+            <% end %>
+            <% if @linkedin_profile.connections.present? %>
+              <p class="mb-2"><strong>Connections:</strong> <%= @linkedin_profile.connections %></p>
+            <% end %>
+            <% if @linkedin_profile.pronouns.present? %>
+              <p class="mb-2"><strong>Pronouns:</strong> <%= @linkedin_profile.pronouns %></p>
+            <% end %>
+          </div>
+
+          <div class="mt-3">
+            <%= link_to 'View on LinkedIn', @linkedin_profile.profile_url, target: '_blank', class: 'btn btn-primary w-100' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <% if @linkedin_profile.email.present? || @linkedin_profile.phone.present? || @linkedin_profile.website.present? %>
+        <div class="card mt-3">
+          <div class="card-header">
+            <h4 class="card-title">Contact Information</h4>
+          </div>
+          <div class="card-body">
+            <% if @linkedin_profile.email.present? && @linkedin_profile.email != 'N/A' %>
+              <p class="mb-2"><strong>Email:</strong> <%= @linkedin_profile.email %></p>
+            <% end %>
+            <% if @linkedin_profile.phone.present? && @linkedin_profile.phone != 'N/A' %>
+              <p class="mb-2"><strong>Phone:</strong> <%= @linkedin_profile.phone %></p>
+            <% end %>
+            <% if @linkedin_profile.website.present? && @linkedin_profile.website != 'N/A' %>
+              <p class="mb-2"><strong>Website:</strong> <%= link_to @linkedin_profile.website, @linkedin_profile.website, target: '_blank' %></p>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Details -->
+    <div class="col-lg-8">
+      <!-- About -->
+      <% if @linkedin_profile.about.present? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4 class="card-title">About</h4>
+          </div>
+          <div class="card-body">
+            <p style="white-space: pre-wrap;"><%= @linkedin_profile.about %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Current Position -->
+      <% if @linkedin_profile.current_position.present? || @linkedin_profile.current_company.present? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4 class="card-title">Current Position</h4>
+          </div>
+          <div class="card-body">
+            <h5><%= @linkedin_profile.current_position %></h5>
+            <p class="text-muted"><%= @linkedin_profile.current_company %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Experience -->
+      <% experience = @linkedin_profile.experience_list %>
+      <% if experience.present? && experience.any? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4 class="card-title">Experience (<%= experience.length %>)</h4>
+          </div>
+          <div class="card-body">
+            <% experience.each_with_index do |exp, index| %>
+              <div class="mb-3 <%= 'pb-3 border-bottom' if index < experience.length - 1 %>">
+                <h5 class="mb-1"><%= exp['position'] || exp['title'] || 'Position' %></h5>
+                <p class="text-muted mb-1"><%= exp['company'] || 'Company' %></p>
+                <p class="text-muted small"><%= exp['duration'] || exp['dates'] || 'Duration' %></p>
+                <% if exp['description'].present? %>
+                  <p class="mt-2" style="white-space: pre-wrap;"><%= exp['description'] %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Education -->
+      <% education = @linkedin_profile.education_list %>
+      <% if education.present? && education.any? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4 class="card-title">Education (<%= education.length %>)</h4>
+          </div>
+          <div class="card-body">
+            <% education.each_with_index do |edu, index| %>
+              <div class="mb-3 <%= 'pb-3 border-bottom' if index < education.length - 1 %>">
+                <h5 class="mb-1"><%= edu['school'] || edu['institution'] || 'Institution' %></h5>
+                <p class="text-muted mb-1"><%= edu['degree'] || edu['field'] || 'Degree' %></p>
+                <% if edu['dates'].present? || edu['year'].present? %>
+                  <p class="text-muted small"><%= edu['dates'] || edu['year'] %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Skills -->
+      <% skills = @linkedin_profile.skills_array %>
+      <% if skills.present? && skills.any? %>
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4 class="card-title">Skills (<%= @linkedin_profile.skills_count %>)</h4>
+          </div>
+          <div class="card-body">
+            <% skills.each do |skill| %>
+              <span class="badge bg-secondary me-2 mb-2"><%= skill %></span>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

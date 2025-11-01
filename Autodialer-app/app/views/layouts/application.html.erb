@@ -490,6 +490,20 @@
             <span>Generate Blog</span>
           <% end %>
         </li>
+
+        <li class="sidebar-nav-item">
+          <%= link_to linkedin_profiles_path, class: "sidebar-nav-link #{'active' if controller_name == 'linkedin_profiles' && action_name != 'new'}" do %>
+            <i class="bi bi-linkedin"></i>
+            <span>LinkedIn Scraper</span>
+          <% end %>
+        </li>
+
+        <li class="sidebar-nav-item">
+          <%= link_to new_linkedin_profile_path, class: "sidebar-nav-link #{'active' if controller_name == 'linkedin_profiles' && action_name == 'new'}" do %>
+            <i class="bi bi-plus-circle"></i>
+            <span>Add Profiles</span>
+          <% end %>
+        </li>
       </ul>
 
       <div class="sidebar-footer">
@@ -557,6 +571,7 @@
             <ul class="list-unstyled">
               <li><a href="<%= autodialer_index_path %>" class="text-muted text-decoration-none">Bulk Phone Calling</a></li>
               <li><a href="<%= blog_posts_path %>" class="text-muted text-decoration-none">AI Blog Generator</a></li>
+              <li><a href="<%= linkedin_profiles_path %>" class="text-muted text-decoration-none">LinkedIn Scraper</a></li>
               <li><a href="<%= autodialer_analytics_path %>" class="text-muted text-decoration-none">Call Analytics</a></li>
             </ul>
           </div>

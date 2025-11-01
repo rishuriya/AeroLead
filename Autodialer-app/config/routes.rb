@@ -28,6 +28,20 @@ Rails.application.routes.draw do
     end
   end
 
+  # LinkedIn profiles routes
+  resources :linkedin_profiles do
+    collection do
+      post :upload_csv
+      post :bulk_create
+    end
+    member do
+      post :retry_scraping
+    end
+  end
+
+  # LinkedIn analytics
+  get '/linkedin_profiles/analytics', to: 'linkedin_profiles#analytics', as: 'linkedin_profiles_analytics'
+
   # AI Commands - explicit controller reference
   post '/ai/command', to: 'ai_commands#execute'
   post '/ai/parse', to: 'ai_commands#parse'

@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 class PhoneCall < ApplicationRecord
+  # Turbo Streams for real-time updates
+  after_create_commit { broadcast_prepend_to "phone_calls", partial: "phone_calls/phone_call", locals: { phone_call: self }, target: "phone_calls" }
+  after_update_commit { broadcast_replace_to "phone_calls", partial: "phone_calls/phone_call", locals: { phone_call: self } }
+  after_destroy_commit { broadcast_remove_to "phone_calls" }
+
   # Validations
   validates :phone_number, presence: true, phone: { possible: true, allow_blank: false }
   validates :status, presence: true, inclusion: {

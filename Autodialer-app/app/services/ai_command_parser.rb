@@ -33,6 +33,10 @@ class AICommandParser
       execute_generate_blog(parsed)
     when 'bulk_generate_blog'
       execute_bulk_generate_blog(parsed)
+    when 'scrape_linkedin'
+      execute_scrape_linkedin(parsed)
+    when 'bulk_scrape_linkedin'
+      execute_bulk_scrape_linkedin(parsed)
     when 'check_status'
       execute_check_status(parsed)
     else
@@ -65,6 +69,7 @@ class AICommandParser
       phone_numbers: Array(result['phone_numbers'] || result[:phone_numbers]),
       message: result['message'] || result[:message],
       blog_topics: Array(result['blog_topics'] || result[:blog_topics]),
+      linkedin_urls: Array(result['linkedin_urls'] || result[:linkedin_urls]),
       parameters: result['parameters'] || result[:parameters] || {},
       success: true
     }
@@ -149,7 +154,49 @@ class AICommandParser
       success: true,
       action: 'check_status',
       phone_calls: PhoneCall.analytics,
-      blog_posts: BlogPost.statistics
+      blog_posts: BlogPost.statistics,
+      linkedin_profiles: LinkedinProfile.statistics
+    }
+  end
+
+  def execute_scrape_linkedin(parsed)
+    url = parsed[:linkedin_urls].first
+
+    return { error: 'No LinkedIn URL provided', success: false } if url.blank?
+
+    profile = LinkedinProfile.create!(profile_url: url)
+
+    # Use batch scraping job for efficiency
+    BatchLinkedinScrapingJob.perform_later([profile.id])
+
+    {
+      success: true,
+      action: 'scrape_linkedin',
+      message: "LinkedIn profile scraping queued: #{url}",
+      linkedin_profile_id: profile.id
+    }
+  end
+
+  def execute_bulk_scrape_linkedin(parsed)
+    urls = parsed[:linkedin_urls]
+
+    return { error: 'No LinkedIn URLs provided', success: false } if urls.empty?
+
+    created_ids = []
+    profiles = urls.map do |url|
+      profile = LinkedinProfile.create!(profile_url: url)
+      created_ids << profile.id
+      profile
+    end
+
+    # Use batch scraping job - scrape all profiles in one call
+    BatchLinkedinScrapingJob.perform_later(created_ids)
+
+    {
+      success: true,
+      action: 'bulk_scrape_linkedin',
+      message: "#{profiles.count} LinkedIn profiles queued for batch scraping",
+      linkedin_profile_ids: profiles.map(&:id)
     }
   end
 end

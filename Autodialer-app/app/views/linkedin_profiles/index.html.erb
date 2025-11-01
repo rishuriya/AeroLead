@@ -1,0 +1,142 @@
+<div class="container-fluid">
+  <!-- Page Header -->
+  <div class="row mb-5">
+    <div class="col-12">
+      <h1 class="page-title">LinkedIn Profile Scraper</h1>
+      <p class="page-subtitle">Scrape LinkedIn profiles to extract professional information</p>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="row g-3 mb-5">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value"><%= @statistics[:total] %></div>
+        <div class="stat-label">Total Profiles</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #10b981;"><%= @statistics[:completed] %></div>
+        <div class="stat-label">Completed</div>
+        <div class="stat-detail"><%= number_to_percentage(@statistics[:success_rate], precision: 1) %> success rate</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #3b82f6;"><%= @statistics[:scraping] %></div>
+        <div class="stat-label">Scraping</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-value" style="color: #9ca3af;"><%= @statistics[:pending] %></div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <%= link_to new_linkedin_profile_path, class: "btn btn-primary me-2" do %>
+        Add LinkedIn Profiles
+      <% end %>
+      <%= link_to linkedin_profiles_analytics_path, class: "btn btn-outline-secondary" do %>
+        View Analytics
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Profiles Table -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">LinkedIn Profiles</h3>
+        </div>
+        <div class="card-body">
+          <% if @linkedin_profiles.any? %>
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Profile</th>
+                    <th>Name</th>
+                    <th>Headline</th>
+                    <th>Current Position</th>
+                    <th>Status</th>
+                    <th>Scraped At</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @linkedin_profiles.each do |profile| %>
+                    <tr>
+                      <td>
+                        <a href="<%= profile.profile_url %>" target="_blank" class="text-truncate d-block" style="max-width: 200px;">
+                          <%= profile.profile_url %>
+                        </a>
+                      </td>
+                      <td>
+                        <% if profile.completed? %>
+                          <%= link_to profile.name || 'N/A', linkedin_profile_path(profile) %>
+                        <% else %>
+                          <%= profile.name || 'N/A' %>
+                        <% end %>
+                      </td>
+                      <td class="text-truncate" style="max-width: 250px;" title="<%= profile.headline %>"><%= profile.headline || 'N/A' %></td>
+                      <td>
+                        <% if profile.current_position.present? %>
+                          <strong><%= profile.current_position %></strong>
+                          <% if profile.current_company.present? %>
+                            <br><small class="text-muted"><%= profile.current_company %></small>
+                          <% end %>
+                        <% else %>
+                          N/A
+                        <% end %>
+                      </td>
+                      <td>
+                        <% case profile.status %>
+                        <% when 'completed' %>
+                          <span class="badge bg-success">Completed</span>
+                        <% when 'scraping' %>
+                          <span class="badge bg-primary">Scraping...</span>
+                        <% when 'pending' %>
+                          <span class="badge bg-secondary">Pending</span>
+                        <% when 'failed' %>
+                          <span class="badge bg-danger" title="<%= profile.error_message %>">Failed</span>
+                        <% end %>
+                      </td>
+                      <td><%= profile.scraped_at ? time_ago_in_words(profile.scraped_at) + ' ago' : 'N/A' %></td>
+                      <td>
+                        <% if profile.completed? %>
+                          <%= link_to 'View', linkedin_profile_path(profile), class: 'btn btn-sm btn-outline-primary' %>
+                        <% elsif profile.failed? %>
+                          <%= button_to 'Retry', retry_scraping_linkedin_profile_path(profile), method: :post, class: 'btn btn-sm btn-outline-warning' %>
+                        <% end %>
+                        <%= button_to 'Delete', linkedin_profile_path(profile), method: :delete,
+                            data: { confirm: 'Are you sure?' },
+                            class: 'btn btn-sm btn-outline-danger' %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-4">
+              <%= paginate @linkedin_profiles if @linkedin_profiles.respond_to?(:current_page) %>
+            </div>
+          <% else %>
+            <div class="text-center py-5">
+              <p class="text-muted">No LinkedIn profiles yet. Add some profiles to get started!</p>
+              <%= link_to 'Add LinkedIn Profiles', new_linkedin_profile_path, class: 'btn btn-primary' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

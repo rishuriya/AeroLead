@@ -156,27 +156,34 @@ class GeminiService
 
   def build_command_prompt(command)
     <<~PROMPT
-      Parse this autodialer or blog generation command and return structured JSON:
+      Parse this autodialer, blog generation, or LinkedIn scraping command and return structured JSON:
 
       Command: "#{command}"
 
       Analyze the command and determine:
-      1. What action the user wants to perform (make_call, bulk_call, generate_blog, bulk_generate_blog, check_status)
+      1. What action the user wants to perform (make_call, bulk_call, generate_blog, bulk_generate_blog, scrape_linkedin, bulk_scrape_linkedin, check_status)
       2. Any phone numbers mentioned
       3. Any messages or content to deliver
       4. Any blog topics to generate
+      5. Any LinkedIn profile URLs to scrape
 
       Return ONLY valid JSON in this exact format (NO markdown code blocks, NO backticks, NO explanations):
       {
-        "action": "make_call|bulk_call|generate_blog|bulk_generate_blog|check_status",
+        "action": "make_call|bulk_call|generate_blog|bulk_generate_blog|scrape_linkedin|bulk_scrape_linkedin|check_status",
         "phone_numbers": ["array of phone numbers if applicable"],
         "message": "message to deliver if applicable",
         "blog_topics": ["array of blog topics if applicable"],
+        "linkedin_urls": ["array of LinkedIn profile URLs if applicable"],
         "parameters": {
           "count": number,
           "other_params": "values"
         }
       }
+
+      Examples:
+      - "Scrape this LinkedIn profile: https://linkedin.com/in/johndoe" → action: "scrape_linkedin", linkedin_urls: ["https://linkedin.com/in/johndoe"]
+      - "Get LinkedIn info for these profiles: linkedin.com/in/jane, linkedin.com/in/bob" → action: "bulk_scrape_linkedin", linkedin_urls: [...]
+      - "Extract data from LinkedIn profile of John Doe at linkedin.com/in/johndoe" → action: "scrape_linkedin", linkedin_urls: [...]
 
       CRITICAL: Return ONLY the raw JSON object, no markdown formatting, no code blocks, no backticks, no explanation text before or after.
     PROMPT
