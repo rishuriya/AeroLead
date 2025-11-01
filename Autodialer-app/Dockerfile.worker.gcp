@@ -1,0 +1,75 @@
+FROM ruby:3.4.1-slim
+
+WORKDIR /app
+
+# Install dependencies including Puppeteer/Chrome dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    libpq5 \
+    curl \
+    git \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    postgresql-client \
+    # Puppeteer/Chrome dependencies
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    libatspi2.0-0 \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    lsb-release \
+    xdg-utils \
+    wget \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install bundler
+RUN gem install bundler
+
+# Copy Gemfiles
+COPY Gemfile ./
+COPY Gemfile.lock ./
+
+# Install gems
+RUN bundle config set --local without 'development test' && \
+    bundle install --jobs 4 --retry 3
+
+# Copy application
+COPY . .
+
+# Install LinkedIn scraper dependencies and Chromium
+RUN cd lib/linkedin_scraper && \
+    npm install && \
+    PUPPETEER_CACHE_DIR=/root/.cache/puppeteer npx puppeteer browsers install chrome && \
+    cd ../.. && \
+    chmod -R 755 /root/.cache
+
+ENV RAILS_ENV=production
+ENV PORT=8080
+# Set LinkedIn scraper path for the app
+ENV LINKEDIN_SCRAPER_PATH=/app/lib/linkedin_scraper
+
+# Make health server executable
+RUN chmod +x /app/health_server.rb
+
+# Create startup script
+RUN printf '#!/bin/bash\nset -e\n\n# Start health check server in background\nruby /app/health_server.rb &\nHEALTH_PID=$!\necho "Health server started with PID $HEALTH_PID"\n\n# Wait a moment for health server to start\nsleep 2\n\n# Start Sidekiq in the foreground\nexec bundle exec sidekiq -C config/sidekiq.yml\n' > /app/start-worker.sh && \
+    chmod +x /app/start-worker.sh
+
+CMD ["/bin/bash", "/app/start-worker.sh"]

@@ -1,13 +1,19 @@
 # Sidekiq Configuration
 # Background job processing with Redis
+# Note: redis_url_fix.rb runs before this initializer to fix Render's Redis URL format
 
 redis_url = ENV['REDIS_URL'] || 'redis://localhost:6379/0'
+
+# Ensure URL is in correct format
+if redis_url.start_with?('postgresql://')
+  Rails.logger.warn "WARNING: Redis URL still in PostgreSQL format! Check redis_url_fix.rb initializer."
+end
 
 Sidekiq.configure_server do |config|
   config.redis = {
     url: redis_url,
-    network_timeout: 5,
-    pool_timeout: 5
+    network_timeout: 10,
+    pool_timeout: 10
   }
 
   # Server-specific configuration
@@ -30,8 +36,8 @@ end
 Sidekiq.configure_client do |config|
   config.redis = {
     url: redis_url,
-    network_timeout: 5,
-    pool_timeout: 5,
+    network_timeout: 10,
+    pool_timeout: 10,
     size: 5
   }
 end

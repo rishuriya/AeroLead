@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Api
+module API
   module V1
     class BaseController < ActionController::API
       rescue_from ActiveRecord::RecordNotFound, with: :record_not_found

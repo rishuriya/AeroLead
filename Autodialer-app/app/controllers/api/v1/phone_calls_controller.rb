@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Api
+module API
   module V1
-    class PhoneCallsController < BaseController
+    class PhoneCallsController < API::V1::BaseController
       before_action :set_phone_call, only: [:show, :destroy]
 
       # GET /api/v1/phone_calls

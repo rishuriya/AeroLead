@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Api
+module API
   module V1
-    class BlogPostsController < BaseController
+    class BlogPostsController < API::V1::BaseController
       before_action :set_blog_post, only: [:show, :update, :destroy]
 
       # GET /api/v1/blog_posts

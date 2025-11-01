@@ -52,9 +52,7 @@ class BatchLinkedinScrapingJob < ApplicationJob
     Rails.logger.info "URLs to scrape: #{profile_urls.inspect}"
     scraped_data_array = scraper.scrape_profiles(profile_urls)
 
-    # Update each profile with its scraped data
     scraped_data_array.each do |scraped_data|
-      # Normalize URL to match database format (remove trailing slash)
       profile_url = scraped_data['profile_url'].to_s.gsub(%r{/$}, '')
       profile = profiles.find_by(profile_url: profile_url)
 
@@ -66,8 +64,6 @@ class BatchLinkedinScrapingJob < ApplicationJob
       end
     end
 
-    # Mark any profiles that weren't in the results as failed
-    # Normalize URLs to match database format
     completed_urls = scraped_data_array.map { |data| data['profile_url'].to_s.gsub(%r{/$}, '') }
     failed_profiles = profiles.where.not(profile_url: completed_urls)
 

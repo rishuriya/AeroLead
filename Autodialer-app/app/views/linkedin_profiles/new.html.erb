@@ -15,7 +15,7 @@
           <h3 class="card-title">Single Profile URL</h3>
         </div>
         <div class="card-body">
-          <%= form_with model: @linkedin_profile, local: true do |f| %>
+          <%= form_with url: linkedin_profiles_path, method: :post, local: true, scope: :linkedin_profile do |f| %>
             <div class="form-group">
               <label for="profile_url" class="form-label">LinkedIn Profile URL</label>
               <small class="text-muted d-block mb-2">Enter a single LinkedIn profile URL</small>

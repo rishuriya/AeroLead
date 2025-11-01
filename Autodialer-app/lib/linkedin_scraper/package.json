@@ -1,0 +1,41 @@
+{
+  "name": "linkedin-scraper-puppeteer",
+  "version": "1.0.0",
+  "description": "LinkedIn scraper using Puppeteer with reCAPTCHA v2 solver",
+  "main": "puppeteer_scraper.js",
+  "scripts": {
+    "install-deps": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install",
+    "install:full": "npm install",
+    "test": "node puppeteer_scraper.js"
+  },
+  "keywords": [
+    "linkedin",
+    "scraper",
+    "puppeteer",
+    "recaptcha"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^24.27.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-recaptcha": "^3.6.8",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "recaptcha-v2-solver": "^1.0.2"
+  },
+  "overrides": {
+    "recaptcha-v2-solver": {
+      "puppeteer": "^24.27.0",
+      "puppeteer-screen-recorder": {
+        "puppeteer": "^24.27.0"
+      }
+    }
+  },
+  "config": {
+    "puppeteer": {
+      "skipChromiumDownload": false
+    }
+  }
+}

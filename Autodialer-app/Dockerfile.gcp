@@ -1,0 +1,47 @@
+# Dockerfile for GCP Cloud Run
+FROM ruby:3.4.1-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    curl \
+    git \
+    libxml2-dev \
+    libxslt1-dev \
+    libffi-dev \
+    postgresql-client \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Bundler
+RUN gem install bundler
+
+# Copy Gemfiles
+COPY Gemfile Gemfile.lock ./
+
+# Configure bundler and install gems
+RUN bundle config set --local without 'development test' && \
+    bundle install --jobs 4 --retry 3
+
+# Copy application code
+COPY . .
+
+# Precompile assets
+ENV RAILS_ENV=production
+ENV SECRET_KEY_BASE=dummy_for_assets
+RUN bundle exec rails assets:precompile && \
+    rm -rf node_modules tmp/cache
+
+# Cloud Run configuration
+ENV RAILS_LOG_TO_STDOUT=true
+ENV RAILS_SERVE_STATIC_FILES=true
+
+# Expose port
+EXPOSE 8080
+
+# Start ONLY Puma (not the start-web.sh script which also starts Sidekiq)
+# On GCP, we have a separate worker service for Sidekiq
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]

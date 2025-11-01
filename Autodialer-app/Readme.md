@@ -213,10 +213,12 @@ yarn install
 
 ### 3. Set Up LinkedIn Scraper (Optional)
 
+The LinkedIn scraper is integrated in `lib/linkedin_scraper/`. Dependencies are automatically installed during Docker builds. For local development:
+
 ```bash
-cd ../Linkedin-scrapper
+cd lib/linkedin_scraper
 npm install
-cd ../Autodialer-app
+cd ../..
 ```
 
 ### 4. Configure Database
@@ -315,7 +317,7 @@ All configuration is done via environment variables. See `.env.example` for a co
 |----------|-------------|---------|
 | `OPENAI_API_KEY` | OpenAI API key | - |
 | `ANTHROPIC_API_KEY` | Anthropic API key | - |
-| `LINKEDIN_SCRAPER_PATH` | Path to scraper directory | `../Linkedin-scrapper` |
+| `LINKEDIN_SCRAPER_PATH` | Path to scraper directory | `lib/linkedin_scraper` |
 | `MAX_PHONE_NUMBERS_PER_BATCH` | Max numbers per batch | `100` |
 | `MAX_BULK_ARTICLES` | Max articles per generation | `20` |
 | `WEB_CONCURRENCY` | Puma workers | `2` |
@@ -330,9 +332,11 @@ Configure these webhook URLs in your Twilio console:
 
 ### LinkedIn Scraper Setup
 
+The scraper is integrated in `lib/linkedin_scraper/`. For local development:
+
 1. Navigate to scraper directory:
 ```bash
-cd ../Linkedin-scrapper
+cd lib/linkedin_scraper
 ```
 
 2. Install dependencies:
@@ -342,7 +346,7 @@ npm install
 
 3. First-time login (saves cookies):
 ```bash
-node puppeteer_scraper.js login
+node puppeteer_scraper.js login-only --no-headless
 ```
 
 4. Test scraping:
@@ -430,7 +434,7 @@ curl http://localhost:3000/api/v1/blog_posts
 
 ```bash
 # Scrape a single profile
-cd ../Linkedin-scrapper
+cd lib/linkedin_scraper
 node puppeteer_scraper.js scrape https://www.linkedin.com/in/example
 
 # Scrape multiple profiles

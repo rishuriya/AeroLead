@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module Api
+module API
   module V1
-    class AiCommandsController < BaseController
+    class AICommandsController < API::V1::BaseController
       # POST /api/v1/ai/command
       def execute
         command = params[:command]

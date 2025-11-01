@@ -1,0 +1,166 @@
+# Google Cloud Build Configuration
+# Automatically builds and pushes Docker images to Google Container Registry
+# Usage: gcloud builds submit --config=cloudbuild.yaml .
+
+steps:
+  # ============================================
+  # Step 1: Build Web Service Image
+  # ============================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-web'
+    args:
+      - 'build'
+      - '-f'
+      - 'Autodialer-app/Dockerfile.gcp'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-web:latest'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-web:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-web:$BUILD_ID'
+      - './Autodialer-app'
+    waitFor: ['-']
+
+  # ============================================
+  # Step 2: Build Worker Service Image
+  # ============================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-worker'
+    args:
+      - 'build'
+      - '-f'
+      - 'Autodialer-app/Dockerfile.worker.gcp'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-worker:latest'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-worker:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/aerolead-worker:$BUILD_ID'
+      - './Autodialer-app'
+    waitFor: ['-']
+
+  # ============================================
+  # Step 3: Push Web Service Image
+  # ============================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-web-latest'
+    args: ['push', 'gcr.io/$PROJECT_ID/aerolead-web:latest']
+    waitFor: ['build-web']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-web-commit'
+    args: ['push', 'gcr.io/$PROJECT_ID/aerolead-web:$COMMIT_SHA']
+    waitFor: ['build-web']
+
+  # ============================================
+  # Step 4: Push Worker Service Image
+  # ============================================
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-worker-latest'
+    args: ['push', 'gcr.io/$PROJECT_ID/aerolead-worker:latest']
+    waitFor: ['build-worker']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-worker-commit'
+    args: ['push', 'gcr.io/$PROJECT_ID/aerolead-worker:$COMMIT_SHA']
+    waitFor: ['build-worker']
+
+  # ============================================
+  # Step 5: Deploy Web Service to Cloud Run
+  # ============================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-web'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'aerolead-web'
+      - '--image=gcr.io/$PROJECT_ID/aerolead-web:$COMMIT_SHA'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--min-instances=${_WEB_MIN_INSTANCES}'
+      - '--max-instances=${_WEB_MAX_INSTANCES}'
+      - '--set-env-vars=RAILS_ENV=production,PORT=8080,RAILS_LOG_TO_STDOUT=true,RAILS_SERVE_STATIC_FILES=true'
+    waitFor: ['push-web-commit', 'push-web-latest']
+
+  # ============================================
+  # Step 6: Deploy Worker Service to Cloud Run
+  # ============================================
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-worker'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'aerolead-worker'
+      - '--image=gcr.io/$PROJECT_ID/aerolead-worker:$COMMIT_SHA'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--no-allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=4Gi'
+      - '--cpu=2'
+      - '--min-instances=${_WORKER_MIN_INSTANCES}'
+      - '--max-instances=${_WORKER_MAX_INSTANCES}'
+      - '--set-env-vars=RAILS_ENV=production,PORT=8080,LINKEDIN_SCRAPER_PATH=/app/lib/linkedin_scraper'
+    waitFor: ['push-worker-commit', 'push-worker-latest']
+
+  # ============================================
+  # Step 7: Run Database Migrations (Optional)
+  # Uncomment to run migrations automatically
+  # ============================================
+  # - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  #   id: 'run-migrations'
+  #   entrypoint: 'gcloud'
+  #   args:
+  #     - 'run'
+  #     - 'jobs'
+  #     - 'execute'
+  #     - 'aerolead-migrate'
+  #     - '--region=${_REGION}'
+  #     - '--wait'
+  #   waitFor: ['deploy-web']
+
+# Images to be stored in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/aerolead-web:latest'
+  - 'gcr.io/$PROJECT_ID/aerolead-web:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/aerolead-web:$BUILD_ID'
+  - 'gcr.io/$PROJECT_ID/aerolead-worker:latest'
+  - 'gcr.io/$PROJECT_ID/aerolead-worker:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/aerolead-worker:$BUILD_ID'
+
+# Substitution variables (can be overridden)
+substitutions:
+  _REGION: 'us-central1'
+  _WEB_MIN_INSTANCES: '1'
+  _WEB_MAX_INSTANCES: '10'
+  _WORKER_MIN_INSTANCES: '1'
+  _WORKER_MAX_INSTANCES: '3'
+
+# Build options
+options:
+  # Machine type for build (higher = faster build)
+  machineType: 'N1_HIGHCPU_8'
+
+  # Disk size in GB
+  diskSizeGb: 100Gib
+
+  # Logging options
+  logging: CLOUD_LOGGING_ONLY
+
+  # Log stream to watch
+  logStreamingOption: STREAM_ON
+
+# Build timeout (30 minutes)
+timeout: '1800s'
+
+# Tags for organizing builds
+tags:
+  - 'aerolead'
+  - 'cloud-run'
+  - 'production'
