@@ -140,3 +140,49 @@
     </div>
   </div>
 </div>
+
+<script>
+  // Auto-refresh page every 10 seconds if there are profiles being scraped
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if user was just redirected from adding profiles
+    const hasFlashMessage = document.querySelector('.alert');
+    const wasRedirectedFromAdd = hasFlashMessage &&
+      (hasFlashMessage.textContent.includes('queued') || hasFlashMessage.textContent.includes('added'));
+
+    const checkForActiveProfiles = function() {
+      const scrapingBadges = document.querySelectorAll('.badge.bg-primary, .badge.bg-secondary');
+      let hasActive = false;
+
+      scrapingBadges.forEach(badge => {
+        const text = badge.textContent.trim();
+        if (text === 'Scraping...' || text === 'Pending') {
+          hasActive = true;
+        }
+      });
+
+      return hasActive;
+    };
+
+    // Only set up polling if there are active profiles OR user just added profiles
+    if (checkForActiveProfiles() || wasRedirectedFromAdd) {
+      let pollCount = 0;
+      const maxPolls = wasRedirectedFromAdd ? 60 : -1; // Poll for 10 minutes if redirected, else indefinitely
+
+      const pollInterval = setInterval(function() {
+        if (!checkForActiveProfiles() && !wasRedirectedFromAdd) {
+          clearInterval(pollInterval);
+          return;
+        }
+
+        pollCount++;
+        if (maxPolls > 0 && pollCount >= maxPolls) {
+          clearInterval(pollInterval);
+          console.log('Stopped polling for LinkedIn profiles after timeout');
+          return;
+        }
+
+        location.reload();
+      }, 10000); // Refresh every 10 seconds
+    }
+  });
+</script>

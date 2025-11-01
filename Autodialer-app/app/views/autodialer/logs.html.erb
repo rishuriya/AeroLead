@@ -287,3 +287,73 @@
     <% end %>
   </div>
 </div>
+
+<script>
+  // Auto-refresh page every 5 seconds if there are active calls (but not while filtering)
+  document.addEventListener('DOMContentLoaded', function() {
+    let userIsActive = false;
+    let lastActivityTime = Date.now();
+
+    // Track user activity in form fields
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        userIsActive = true;
+        lastActivityTime = Date.now();
+      });
+
+      input.addEventListener('blur', function() {
+        userIsActive = false;
+        lastActivityTime = Date.now();
+      });
+
+      input.addEventListener('input', function() {
+        lastActivityTime = Date.now();
+      });
+    });
+
+    const checkForActiveCalls = function() {
+      const activeBadges = document.querySelectorAll('.badge.bg-primary, .badge.bg-info');
+      let hasActive = false;
+
+      activeBadges.forEach(badge => {
+        const text = badge.textContent.trim();
+        if (text.includes('Ringing') || text.includes('In Progress') || text.includes('Queued')) {
+          hasActive = true;
+        }
+      });
+
+      // Also check the pending count in stats
+      const pendingCount = parseInt(document.querySelector('.text-warning')?.textContent || '0');
+      if (pendingCount > 0) {
+        hasActive = true;
+      }
+
+      return hasActive;
+    };
+
+    const shouldRefresh = function() {
+      // Don't refresh if user is actively using filter form
+      if (userIsActive) {
+        return false;
+      }
+
+      // Don't refresh if user was active in the last 5 seconds
+      const timeSinceActivity = Date.now() - lastActivityTime;
+      if (timeSinceActivity < 5000) { // 5 seconds
+        return false;
+      }
+
+      return checkForActiveCalls();
+    };
+
+    // Only set up polling if there are active calls
+    if (checkForActiveCalls()) {
+      setInterval(function() {
+        if (shouldRefresh()) {
+          location.reload();
+        }
+      }, 5000); // Refresh every 5 seconds for call logs
+    }
+  });
+</script>

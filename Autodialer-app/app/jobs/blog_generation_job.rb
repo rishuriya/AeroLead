@@ -3,7 +3,7 @@
 class BlogGenerationJob < ApplicationJob
   queue_as :default
 
-  retry_on StandardError, wait: :exponentially_longer, attempts: 2
+  retry_on StandardError, wait: :polynomially_longer, attempts: 2
 
   def perform(title, ai_model = 'gemini', context: nil, word_count: 1000)
     Rails.logger.info "Generating blog post: #{title} using #{ai_model}"

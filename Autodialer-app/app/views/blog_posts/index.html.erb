@@ -401,3 +401,36 @@
     color: #dc2626;
   }
 </style>
+
+<script>
+  // Auto-refresh page to show newly generated blog posts
+  document.addEventListener('DOMContentLoaded', function() {
+    // Check if user was just redirected from generation (has query param or flash message)
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasFlashMessage = document.querySelector('.alert');
+    const wasRedirectedFromGeneration = hasFlashMessage &&
+      (hasFlashMessage.textContent.includes('queued') || hasFlashMessage.textContent.includes('generation'));
+
+    // Only auto-refresh if user was just redirected from blog generation
+    if (!wasRedirectedFromGeneration) {
+      return; // Don't poll if user just navigated here normally
+    }
+
+    let pollInterval;
+    const initialCount = <%= @blog_posts.total_count rescue @blog_posts.size %>;
+
+    // Poll every 8 seconds to check for new blog posts
+    pollInterval = setInterval(function() {
+      // Reload the page to get new blog posts
+      location.reload();
+    }, 8000); // Refresh every 8 seconds
+
+    // Stop polling after 5 minutes to save resources
+    setTimeout(function() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        console.log('Stopped polling for blog posts after 5 minutes');
+      }
+    }, 5 * 60 * 1000); // 5 minutes
+  });
+</script>

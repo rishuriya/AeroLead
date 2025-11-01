@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   end
 
   # LinkedIn profiles routes
-  resources :linkedin_profiles do
+  resources :linkedin_profiles, only: [:index, :new, :create, :show, :destroy] do
     collection do
       post :upload_csv
       post :bulk_create

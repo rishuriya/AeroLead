@@ -2,9 +2,10 @@
 
 class LinkedinProfile < ApplicationRecord
   # Turbo Streams for real-time updates
-  after_create_commit { broadcast_prepend_to "linkedin_profiles", partial: "linkedin_profiles/linkedin_profile", locals: { linkedin_profile: self }, target: "linkedin_profiles" }
-  after_update_commit { broadcast_replace_to "linkedin_profiles", partial: "linkedin_profiles/linkedin_profile", locals: { linkedin_profile: self } }
-  after_destroy_commit { broadcast_remove_to "linkedin_profiles" }
+  # Note: Commented out because partial doesn't exist. Uncomment when implementing real-time updates.
+  # after_create_commit { broadcast_prepend_to "linkedin_profiles", partial: "linkedin_profiles/linkedin_profile", locals: { linkedin_profile: self }, target: "linkedin_profiles" }
+  # after_update_commit { broadcast_replace_to "linkedin_profiles", partial: "linkedin_profiles/linkedin_profile", locals: { linkedin_profile: self } }
+  # after_destroy_commit { broadcast_remove_to "linkedin_profiles" }
 
   # Serialization for TEXT columns that store JSON
   # Note: Only uncomment these if you've run the migration to change columns to TEXT
@@ -170,6 +171,23 @@ class LinkedinProfile < ApplicationRecord
 
     BatchLinkedinScrapingJob.perform_later(pending_ids)
     pending_ids.count
+  end
+
+  # Reset profiles stuck in 'scraping' status for too long (e.g., from interrupted jobs)
+  def self.reset_stuck_profiles(timeout_minutes: 30)
+    stuck_profiles = scraping
+                     .where('updated_at < ?', timeout_minutes.minutes.ago)
+
+    count = stuck_profiles.count
+    return 0 if count.zero?
+
+    stuck_profiles.update_all(
+      status: 'pending',
+      error_message: 'Reset from stuck scraping status'
+    )
+
+    Rails.logger.info "Reset #{count} stuck profiles to pending status"
+    count
   end
 
   def parse_json_field(field)

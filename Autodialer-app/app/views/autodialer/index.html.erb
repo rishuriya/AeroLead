@@ -409,3 +409,79 @@
     margin-bottom: 0.5rem;
   }
 </style>
+
+<script>
+  // Auto-refresh page when there are active calls (but not while user is typing)
+  document.addEventListener('DOMContentLoaded', function() {
+    let userIsActive = false;
+    let lastActivityTime = Date.now();
+
+    // Track user activity in form fields
+    const formInputs = document.querySelectorAll('input, textarea, select');
+    formInputs.forEach(input => {
+      input.addEventListener('focus', function() {
+        userIsActive = true;
+        lastActivityTime = Date.now();
+      });
+
+      input.addEventListener('blur', function() {
+        userIsActive = false;
+        lastActivityTime = Date.now();
+      });
+
+      input.addEventListener('input', function() {
+        lastActivityTime = Date.now();
+      });
+    });
+
+    const checkForActiveCalls = function() {
+      // Check if there are any pending calls in the stats
+      const pendingCount = <%= @analytics[:pending] || 0 %>;
+
+      // Also check for active status badges in the table
+      const activeBadges = document.querySelectorAll('.badge.bg-primary, .badge.bg-info, .badge.bg-warning');
+      let hasActive = false;
+
+      activeBadges.forEach(badge => {
+        const text = badge.textContent.trim();
+        if (text.includes('Queued') || text.includes('Ringing') || text.includes('In Progress')) {
+          hasActive = true;
+        }
+      });
+
+      return pendingCount > 0 || hasActive;
+    };
+
+    const shouldRefresh = function() {
+      // Don't refresh if user is actively typing/focused on a form field
+      if (userIsActive) {
+        return false;
+      }
+
+      // Don't refresh if user was active in the last 10 seconds
+      const timeSinceActivity = Date.now() - lastActivityTime;
+      if (timeSinceActivity < 10000) { // 10 seconds
+        return false;
+      }
+
+      // Check if there are any unsaved changes in forms
+      const phoneNumbers = document.querySelector('textarea[name="phone_numbers"]');
+      const message = document.querySelector('textarea[name="message"]');
+      if ((phoneNumbers && phoneNumbers.value.trim()) ||
+          (message && message.value.trim() && message.value !== message.defaultValue)) {
+        return false; // Don't refresh if there's unsaved input
+      }
+
+      return checkForActiveCalls();
+    };
+
+    // Only set up polling if there are active calls
+    if (checkForActiveCalls()) {
+      setInterval(function() {
+        if (shouldRefresh()) {
+          location.reload();
+        }
+      }, 5000); // Check every 5 seconds, but only refresh if safe
+    }
+  });
+</script>
