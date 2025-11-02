@@ -469,7 +469,7 @@
             case 'generate_blog':
             case 'bulk_generate_blog':
               message = response.message || 'Blog posts generated successfully';
-              redirectPath = '<%= blog_posts_path rescue '/blog_posts' %>';
+              redirectPath = '<%= blog_path rescue '/blog' %>';
               break;
 
             case 'check_status':

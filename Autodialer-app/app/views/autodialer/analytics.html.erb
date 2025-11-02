@@ -274,7 +274,7 @@
                 <div class="list-group-item">
                   <div class="d-flex w-100 justify-content-between">
                     <h6 class="mb-1">
-                      <%= link_to blog.title, blog_post_path(blog.slug), class: "text-decoration-none", style: "color: #667eea;" %>
+                      <%= link_to blog.title, show_blog_path(blog.slug), class: "text-decoration-none", style: "color: #667eea;" %>
                     </h6>
                     <% if blog.ai_model.present? %>
                       <small class="badge" style="background: #3b82f6; color: white;"><%= blog.ai_model.upcase %></small>
@@ -295,7 +295,7 @@
           <% end %>
         </div>
         <div class="card-footer text-center">
-          <%= link_to "View All Posts", blog_posts_path, class: "btn btn-sm", style: "background: #3b82f6; color: white; border: none;" %>
+          <%= link_to "View All Posts", blog_path, class: "btn btn-sm", style: "background: #3b82f6; color: white; border: none;" %>
         </div>
       </div>
     </div>

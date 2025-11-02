@@ -15,18 +15,33 @@ Rails.application.routes.draw do
   get '/autodialer/logs', to: 'autodialer#logs', as: 'autodialer_logs'
   get '/autodialer/analytics', to: 'autodialer#analytics', as: 'autodialer_analytics'
 
-  # Blog posts routes
-  resources :blog_posts do
-    collection do
-      get :generate_new
-      post :generate
-      post :bulk_generate
-    end
-    member do
-      post :publish
-      post :unpublish
-    end
-  end
+  # Blog routes - /blog paths only
+  get '/blog', to: 'blog_posts#index', as: 'blog'
+  get '/blog/generate/new', to: 'blog_posts#generate_new', as: 'generate_new_blog'
+  post '/blog/generate', to: 'blog_posts#generate', as: 'generate_blog'
+  post '/blog/bulk_generate', to: 'blog_posts#bulk_generate', as: 'bulk_generate_blog'
+  get '/blog/new', to: 'blog_posts#new', as: 'new_blog'
+  post '/blog', to: 'blog_posts#create', as: 'create_blog'
+  get '/blog/:id', to: 'blog_posts#show', as: 'show_blog', constraints: { id: /[^\/]+/ }
+  get '/blog/:id/edit', to: 'blog_posts#edit', as: 'edit_blog'
+  patch '/blog/:id', to: 'blog_posts#update', as: 'update_blog'
+  delete '/blog/:id', to: 'blog_posts#destroy', as: 'destroy_blog'
+  post '/blog/:id/publish', to: 'blog_posts#publish', as: 'publish_blog'
+  post '/blog/:id/unpublish', to: 'blog_posts#unpublish', as: 'unpublish_blog'
+
+  # Legacy /blog_posts paths - redirect to /blog
+  get '/blog_posts', to: redirect('/blog')
+  get '/blog_posts/generate_new', to: redirect('/blog/generate/new')
+  post '/blog_posts/generate', to: redirect('/blog/generate')
+  post '/blog_posts/bulk_generate', to: redirect('/blog/bulk_generate')
+  get '/blog_posts/new', to: redirect('/blog/new')
+  post '/blog_posts', to: redirect('/blog')
+  get '/blog_posts/:slug', to: redirect { |params, request| "/blog/#{params[:slug]}" }
+  get '/blog_posts/:slug/edit', to: redirect { |params, request| "/blog/#{params[:slug]}/edit" }
+  patch '/blog_posts/:slug', to: redirect { |params, request| "/blog/#{params[:slug]}" }
+  delete '/blog_posts/:slug', to: redirect { |params, request| "/blog/#{params[:slug]}" }
+  post '/blog_posts/:slug/publish', to: redirect { |params, request| "/blog/#{params[:slug]}/publish" }
+  post '/blog_posts/:slug/unpublish', to: redirect { |params, request| "/blog/#{params[:slug]}/unpublish" }
 
   # LinkedIn profiles routes
   resources :linkedin_profiles, only: [:index, :new, :create, :show, :destroy] do

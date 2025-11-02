@@ -1,4 +1,4 @@
-<%= form_with(model: blog_post, local: true, class: "needs-validation", novalidate: true) do |form| %>
+<%= form_with(model: blog_post, url: blog_post.persisted? ? update_blog_path(blog_post.slug) : create_blog_path, method: blog_post.persisted? ? :patch : :post, local: true, class: "needs-validation", novalidate: true) do |form| %>
   <% if blog_post.errors.any? %>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
       <h5 class="alert-heading">
@@ -123,7 +123,7 @@
     </div>
 
     <div>
-      <%= link_to "Cancel", blog_post.persisted? ? blog_post_path(blog_post.slug) : blog_posts_path,
+      <%= link_to "Cancel", blog_post.persisted? ? show_blog_path(blog_post.slug) : blog_path,
           class: "btn btn-secondary btn-lg" %>
     </div>
   </div>

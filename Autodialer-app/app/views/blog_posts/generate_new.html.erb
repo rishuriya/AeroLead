@@ -6,7 +6,7 @@
       <p class="page-subtitle">Create high-quality blog content using AI</p>
     </div>
     <div class="col-md-4 text-end">
-      <%= link_to blog_posts_path, class: "btn btn-outline" do %>
+      <%= link_to blog_path, class: "btn btn-outline" do %>
         ← Back to Posts
       <% end %>
     </div>
@@ -20,7 +20,7 @@
           <h3 class="card-title">AI Generation Settings</h3>
         </div>
         <div class="card-body">
-          <%= form_with url: generate_blog_posts_path, method: :post, local: true do |f| %>
+          <%= form_with url: generate_blog_path, method: :post, local: true do |f| %>
             <div class="form-group">
               <label for="titles" class="form-label">Blog Titles</label>
               <small class="text-muted d-block mb-2">Enter one title per line</small>

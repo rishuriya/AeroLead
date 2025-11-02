@@ -3,7 +3,7 @@
   <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><%= link_to "Home", root_path %></li>
-      <li class="breadcrumb-item"><%= link_to "Blog Posts", blog_posts_path %></li>
+      <li class="breadcrumb-item"><%= link_to "Blog Posts", blog_path %></li>
       <li class="breadcrumb-item active" aria-current="page">New Post</li>
     </ol>
   </nav>
@@ -37,7 +37,7 @@
           <h6 class="card-title">
             <i class="bi bi-stars"></i> Try AI Generation
           </h6>
-          <small>Use <%= link_to "AI Blog Generator", generate_new_blog_posts_path, class: "text-white fw-bold" %> for instant content</small>
+          <small>Use <%= link_to "AI Blog Generator", generate_new_blog_path, class: "text-white fw-bold" %> for instant content</small>
         </div>
       </div>
     </div>

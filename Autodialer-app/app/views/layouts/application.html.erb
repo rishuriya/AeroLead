@@ -478,14 +478,14 @@
         </li>
 
         <li class="sidebar-nav-item">
-          <%= link_to blog_posts_path, class: "sidebar-nav-link #{'active' if controller_name == 'blog_posts' && action_name != 'generate_new'}" do %>
+          <%= link_to blog_path, class: "sidebar-nav-link #{'active' if controller_name == 'blog_posts' && action_name != 'generate_new'}" do %>
             <i class="bi bi-journal-text"></i>
             <span>Blog Posts</span>
           <% end %>
         </li>
 
         <li class="sidebar-nav-item">
-          <%= link_to generate_new_blog_posts_path, class: "sidebar-nav-link #{'active' if controller_name == 'blog_posts' && action_name == 'generate_new'}" do %>
+          <%= link_to generate_new_blog_path, class: "sidebar-nav-link #{'active' if controller_name == 'blog_posts' && action_name == 'generate_new'}" do %>
             <i class="bi bi-stars"></i>
             <span>Generate Blog</span>
           <% end %>
@@ -567,7 +567,7 @@
             <h6>Features</h6>
             <ul class="list-unstyled">
               <li><a href="<%= autodialer_index_path %>" class="text-muted text-decoration-none">Bulk Phone Calling</a></li>
-              <li><a href="<%= blog_posts_path %>" class="text-muted text-decoration-none">AI Blog Generator</a></li>
+              <li><a href="<%= blog_path %>" class="text-muted text-decoration-none">AI Blog Generator</a></li>
               <li><a href="<%= linkedin_profiles_path %>" class="text-muted text-decoration-none">LinkedIn Scraper</a></li>
               <li><a href="<%= autodialer_analytics_path %>" class="text-muted text-decoration-none">Call Analytics</a></li>
             </ul>

@@ -7,10 +7,10 @@
     </div>
     <div class="col-md-4 text-end">
       <div class="header-actions">
-        <%= link_to generate_new_blog_posts_path, class: "btn btn-primary" do %>
+        <%= link_to generate_new_blog_path, class: "btn btn-primary" do %>
           Generate with AI
         <% end %>
-        <%= link_to new_blog_post_path, class: "btn btn-outline" do %>
+        <%= link_to new_blog_path, class: "btn btn-outline" do %>
           New Post
         <% end %>
       </div>
@@ -50,7 +50,7 @@
     <div class="col-12">
       <div class="card">
         <div class="card-body">
-          <%= form_with url: blog_posts_path, method: :get, local: true, class: "filter-form" do |f| %>
+          <%= form_with url: blog_path, method: :get, local: true, class: "filter-form" do |f| %>
             <div class="row g-3">
               <div class="col-md-3">
                 <%= text_field_tag :search, params[:search],
@@ -77,7 +77,7 @@
               </div>
               <div class="col-md-3">
                 <%= submit_tag "Filter", class: "btn btn-primary w-100" %>
-                <%= link_to "Reset", blog_posts_path, class: "btn btn-outline w-100 mt-2" %>
+                <%= link_to "Reset", blog_path, class: "btn btn-outline w-100 mt-2" %>
               </div>
             </div>
           <% end %>
@@ -95,7 +95,7 @@
             <div class="blog-card-body">
               <div class="blog-header">
                 <h3 class="blog-title">
-                  <%= link_to blog_post.title, blog_post_path(blog_post.slug), class: "blog-title-link" %>
+                  <%= link_to blog_post.title, show_blog_path(blog_post.slug), class: "blog-title-link" %>
                 </h3>
                 <% if blog_post.ai_model.present? %>
                   <span class="blog-badge"><%= blog_post.ai_model.upcase %></span>
@@ -125,18 +125,18 @@
             </div>
 
             <div class="blog-card-footer">
-              <%= link_to blog_post_path(blog_post.slug), class: "btn-link" do %>
+              <%= link_to show_blog_path(blog_post.slug), class: "btn-link" do %>
                 View
               <% end %>
-              <%= link_to edit_blog_post_path(blog_post.slug), class: "btn-link" do %>
+              <%= link_to edit_blog_path(blog_post.slug), class: "btn-link" do %>
                 Edit
               <% end %>
               <% if blog_post.draft? %>
-                <%= button_to publish_blog_post_path(blog_post.slug), method: :post, class: "btn-link" do %>
+                <%= button_to publish_blog_path(blog_post.slug), method: :post, class: "btn-link" do %>
                   Publish
                 <% end %>
               <% end %>
-              <%= button_to blog_post_path(blog_post.slug), method: :delete,
+              <%= button_to show_blog_path(blog_post.slug), method: :delete,
                   data: { confirm: "Are you sure?" },
                   class: "btn-link text-danger" do %>
                 Delete
@@ -159,10 +159,10 @@
           <h4>No blog posts yet</h4>
           <p class="text-muted">Start by generating content with AI or create a new post manually</p>
           <div class="mt-4">
-            <%= link_to generate_new_blog_posts_path, class: "btn btn-primary me-2" do %>
+            <%= link_to generate_new_blog_path, class: "btn btn-primary me-2" do %>
               Generate with AI
             <% end %>
-            <%= link_to new_blog_post_path, class: "btn btn-outline" do %>
+            <%= link_to new_blog_path, class: "btn btn-outline" do %>
               Create Manually
             <% end %>
           </div>
@@ -403,34 +403,111 @@
 </style>
 
 <script>
-  // Auto-refresh page to show newly generated blog posts
+  // Auto-refresh page to show newly generated blog posts from Sidekiq
   document.addEventListener('DOMContentLoaded', function() {
-    // Check if user was just redirected from generation (has query param or flash message)
-    const urlParams = new URLSearchParams(window.location.search);
+    let pollInterval;
+    let lastBlogCount = <%= @blog_posts.total_count rescue @blog_posts.size %>;
+    let lastCreatedAt = <%= @blog_posts.first&.created_at&.to_i || 0 %>;
+    let consecutiveNoChange = 0;
+    let isPollingActive = true;
+    
+    // Track user activity to avoid refreshing while they're using the page
+    let lastActivityTime = Date.now();
+    let userIsActive = false;
+    
+    document.addEventListener('mousemove', function() {
+      lastActivityTime = Date.now();
+      userIsActive = true;
+      setTimeout(() => { userIsActive = false; }, 3000);
+    });
+    
+    document.addEventListener('keydown', function() {
+      lastActivityTime = Date.now();
+      userIsActive = true;
+      setTimeout(() => { userIsActive = false; }, 3000);
+    });
+
+    // Check if user was just redirected from generation (expecting new posts)
     const hasFlashMessage = document.querySelector('.alert');
     const wasRedirectedFromGeneration = hasFlashMessage &&
       (hasFlashMessage.textContent.includes('queued') || hasFlashMessage.textContent.includes('generation'));
-
-    // Only auto-refresh if user was just redirected from blog generation
-    if (!wasRedirectedFromGeneration) {
-      return; // Don't poll if user just navigated here normally
-    }
-
-    let pollInterval;
-    const initialCount = <%= @blog_posts.total_count rescue @blog_posts.size %>;
-
-    // Poll every 8 seconds to check for new blog posts
+    
+    // More frequent polling if we're expecting new posts
+    const pollIntervalMs = wasRedirectedFromGeneration ? 5000 : 15000; // 5s if expecting, 15s otherwise
+    const maxPolls = wasRedirectedFromGeneration ? 120 : 40; // 10 minutes vs 10 minutes
+    let pollCount = 0;
+    
     pollInterval = setInterval(function() {
-      // Reload the page to get new blog posts
-      location.reload();
-    }, 8000); // Refresh every 8 seconds
-
-    // Stop polling after 5 minutes to save resources
-    setTimeout(function() {
+      // Don't poll if user is actively using the page
+      if (userIsActive && Date.now() - lastActivityTime < 3000) {
+        return;
+      }
+      
+      pollCount++;
+      
+      // Use AJAX to check for new posts without full page reload
+      fetch('<%= blog_path %>.json', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        cache: 'no-cache'
+      }).then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        // If JSON fails, fall back to checking if page should reload
+        return null;
+      }).then(data => {
+        if (data) {
+          const currentCount = data.total_count || 0;
+          const currentCreatedAt = data.last_created || 0;
+          
+          // Check if new posts were created
+          if (currentCount > lastBlogCount || currentCreatedAt > lastCreatedAt) {
+            // New blog posts detected! Refresh the page
+            location.reload();
+            return;
+          }
+          
+          consecutiveNoChange++;
+          
+          // Refresh periodically even if no change (every 10 polls = ~80 seconds when expecting, ~150s otherwise)
+          if (consecutiveNoChange >= 10) {
+            consecutiveNoChange = 0;
+            location.reload();
+          }
+          
+          lastBlogCount = currentCount;
+          lastCreatedAt = currentCreatedAt;
+        } else {
+          // Fallback: reload page every few polls if JSON endpoint unavailable
+          if (pollCount % 10 === 0) {
+            location.reload();
+          }
+        }
+      }).catch(error => {
+        console.log('Polling check failed, will retry:', error);
+        // On error, reload every 10 polls as fallback
+        if (pollCount % 10 === 0) {
+          location.reload();
+        }
+      });
+      
+      // Stop polling after max polls
+      if (pollCount >= maxPolls) {
+        clearInterval(pollInterval);
+        isPollingActive = false;
+        console.log('Stopped polling for blog posts after maximum attempts');
+      }
+    }, pollIntervalMs);
+    
+    // Also stop polling if user navigates away
+    window.addEventListener('beforeunload', function() {
       if (pollInterval) {
         clearInterval(pollInterval);
-        console.log('Stopped polling for blog posts after 5 minutes');
       }
-    }, 5 * 60 * 1000); // 5 minutes
+    });
   });
 </script>

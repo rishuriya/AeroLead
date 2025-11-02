@@ -3,8 +3,8 @@
   <nav aria-label="breadcrumb" class="mb-4">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><%= link_to "Home", root_path %></li>
-      <li class="breadcrumb-item"><%= link_to "Blog Posts", blog_posts_path %></li>
-      <li class="breadcrumb-item"><%= link_to @blog_post.title, blog_post_path(@blog_post.slug) %></li>
+      <li class="breadcrumb-item"><%= link_to "Blog Posts", blog_path %></li>
+      <li class="breadcrumb-item"><%= link_to @blog_post.title, show_blog_path(@blog_post.slug) %></li>
       <li class="breadcrumb-item active" aria-current="page">Edit</li>
     </ol>
   </nav>
@@ -19,7 +19,7 @@
       <p class="text-muted">Update your article content and settings</p>
     </div>
     <div class="col-md-4 text-end">
-      <%= link_to blog_post_path(@blog_post.slug), class: "btn btn-outline-secondary" do %>
+      <%= link_to show_blog_path(@blog_post.slug), class: "btn btn-outline-secondary" do %>
         <i class="bi bi-eye"></i> Preview
       <% end %>
     </div>
@@ -30,7 +30,7 @@
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
       <i class="bi bi-info-circle"></i>
       <strong>Draft Mode:</strong> This post is not publicly visible. Publish it to make it accessible.
-      <%= button_to "Publish Now", publish_blog_post_path(@blog_post.slug), method: :post, class: "btn btn-sm btn-success ms-3" %>
+      <%= button_to "Publish Now", publish_blog_path(@blog_post.slug), method: :post, class: "btn btn-sm btn-success ms-3" %>
       <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
   <% elsif @blog_post.published? %>
@@ -100,21 +100,21 @@
         </div>
         <div class="card-body">
           <div class="d-grid gap-2">
-            <%= link_to blog_post_path(@blog_post.slug), class: "btn btn-outline-primary" do %>
+            <%= link_to show_blog_path(@blog_post.slug), class: "btn btn-outline-primary" do %>
               <i class="bi bi-eye"></i> View Post
             <% end %>
 
             <% if @blog_post.draft? %>
-              <%= button_to publish_blog_post_path(@blog_post.slug), method: :post, class: "btn btn-outline-success" do %>
+              <%= button_to publish_blog_path(@blog_post.slug), method: :post, class: "btn btn-outline-success" do %>
                 <i class="bi bi-upload"></i> Publish Post
               <% end %>
             <% elsif @blog_post.published? %>
-              <%= button_to unpublish_blog_post_path(@blog_post.slug), method: :post, class: "btn btn-outline-warning" do %>
+              <%= button_to unpublish_blog_path(@blog_post.slug), method: :post, class: "btn btn-outline-warning" do %>
                 <i class="bi bi-download"></i> Unpublish Post
               <% end %>
             <% end %>
 
-            <%= button_to blog_post_path(@blog_post.slug), method: :delete,
+            <%= button_to show_blog_path(@blog_post.slug), method: :delete,
                 data: { confirm: "Are you sure you want to delete this post? This action cannot be undone." },
                 class: "btn btn-outline-danger" do %>
               <i class="bi bi-trash"></i> Delete Post

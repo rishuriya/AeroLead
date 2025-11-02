@@ -16,6 +16,19 @@ class BlogPostsController < ApplicationController
     @blog_posts = @blog_posts.page(params[:page]).per(20)
 
     @statistics = BlogPost.statistics
+    
+    # Support JSON format for polling
+    respond_to do |format|
+      format.html
+      format.json do
+        render json: {
+          total_count: @blog_posts.total_count,
+          count: @blog_posts.size,
+          statistics: @statistics,
+          last_created: @blog_posts.first&.created_at&.to_i
+        }
+      end
+    end
   end
 
   def show
@@ -32,7 +45,7 @@ class BlogPostsController < ApplicationController
 
     if @blog_post.save
       flash[:notice] = "Blog post created successfully"
-      redirect_to @blog_post
+      redirect_to show_blog_path(@blog_post.slug)
     else
       flash.now[:alert] = "Error creating blog post"
       render :new, status: :unprocessable_entity
@@ -46,7 +59,7 @@ class BlogPostsController < ApplicationController
   def update
     if @blog_post.update(blog_post_params)
       flash[:notice] = "Blog post updated successfully"
-      redirect_to @blog_post
+      redirect_to show_blog_path(@blog_post.slug)
     else
       flash.now[:alert] = "Error updating blog post"
       render :edit, status: :unprocessable_entity
@@ -55,8 +68,8 @@ class BlogPostsController < ApplicationController
 
   def destroy
     @blog_post.destroy
-    flash[:notice] = "Blog post deleted successfully"
-    redirect_to blog_posts_path
+      flash[:notice] = "Blog post deleted successfully"
+      redirect_to blog_path
   end
 
   def generate_new
@@ -71,7 +84,7 @@ class BlogPostsController < ApplicationController
 
     if titles.blank?
       flash[:alert] = "Please enter at least one blog title"
-      redirect_to generate_new_blog_posts_path and return
+      redirect_to generate_new_blog_path and return
     end
 
     # Parse titles (one per line)
@@ -81,7 +94,7 @@ class BlogPostsController < ApplicationController
     max_articles = ENV.fetch('MAX_BULK_ARTICLES', 20).to_i
     if title_list.length > max_articles
       flash[:alert] = "Maximum #{max_articles} articles allowed per batch"
-      redirect_to generate_new_blog_posts_path and return
+      redirect_to generate_new_blog_path and return
     end
 
     # Enqueue generation jobs with Gemini
@@ -90,7 +103,7 @@ class BlogPostsController < ApplicationController
     end
 
     flash[:notice] = "#{title_list.count} blog post(s) queued for AI generation"
-    redirect_to blog_posts_path
+    redirect_to blog_path
   end
 
   def bulk_generate
@@ -120,7 +133,7 @@ class BlogPostsController < ApplicationController
     else
       flash[:alert] = "Error publishing blog post"
     end
-    redirect_to @blog_post
+    redirect_to show_blog_path(@blog_post.slug)
   end
 
   def unpublish
@@ -129,13 +142,14 @@ class BlogPostsController < ApplicationController
     else
       flash[:alert] = "Error unpublishing blog post"
     end
-    redirect_to @blog_post
+    redirect_to show_blog_path(@blog_post.slug)
   end
 
   private
 
   def set_blog_post
-    @blog_post = BlogPost.find_by!(slug: params[:id])
+    slug = params[:id] || params[:slug]
+    @blog_post = BlogPost.find_by!(slug: slug)
   end
 
   def blog_post_params
