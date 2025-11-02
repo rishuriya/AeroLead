@@ -78,6 +78,10 @@ class LinkedinProfile < ApplicationRecord
     experience = parse_json_field(scraped_data['all_experience'])
     education = parse_json_field(scraped_data['all_education'])
 
+    # Ensure arrays are stored as JSON strings (not Ruby hash syntax)
+    experience_json = experience.is_a?(Array) ? experience.to_json : (experience.is_a?(String) ? experience : '[]')
+    education_json = education.is_a?(Array) ? education.to_json : (education.is_a?(String) ? education : '[]')
+
     update(
       status: 'completed',
       scraped_at: Time.current,
@@ -87,9 +91,9 @@ class LinkedinProfile < ApplicationRecord
       about: scraped_data['about'],
       current_company: scraped_data['current_company'],
       current_position: scraped_data['current_position'],
-      all_experience: experience,
+      all_experience: experience_json,
       education: scraped_data['education'],
-      all_education: education,
+      all_education: education_json,
       top_skills: scraped_data['top_skills'],
       all_skills: scraped_data['all_skills'],
       skills_count: scraped_data['skills_count'] || 0,

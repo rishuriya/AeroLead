@@ -30,9 +30,13 @@ An advanced, production-ready LinkedIn scraper using Puppeteer with intelligent 
 - **Free CAPTCHA Solving**: Uses Gemini API (free) to solve reCAPTCHA v2 automatically, with manual fallback option
 - **Multi-Tab Scraping**: Automatically opens different tabs in the same browser for multiple URLs (3-5x faster)
 - **AI-Powered Extraction**: Gemini AI extracts and structures profile data intelligently
+- **Smart Text Normalization**: Automatically fixes corrupted text (e.g., "SDESDE" → "Software Development Engineer")
+- **Intelligent Cleaning**: Removes duplicate words, expands abbreviations, fixes OCR errors
+- **Profile Image Extraction**: Correctly extracts profile pictures (not cover images) using aspect ratio and container detection
 - **Automatic CSV Export**: All scraped data automatically saved to CSV
 - **Anti-Detection**: Stealth mode with advanced browser fingerprinting evasion
 - **Session Persistence**: Cookies saved automatically, reused on next run
+- **Modular Architecture**: Clean, maintainable codebase split into focused modules
 
 ## Installation
 
@@ -247,12 +251,17 @@ When multiple URLs are provided:
 
 2. **AI Processing**:
    - Sends extracted content to Gemini AI
-   - AI structures data intelligently
+   - AI structures data intelligently with text normalization
+   - Automatically fixes corrupted text (e.g., "SDESDE" → "Software Development Engineer")
+   - Expands abbreviations (SDE, PM, etc.)
+   - Removes duplicate words and fixes OCR errors
    - Parses into JSON format
 
 3. **Data Normalization**:
    - Validates all fields
    - Applies defaults for missing fields
+   - Normalizes position titles (removes duplicates, expands abbreviations)
+   - Extracts profile images correctly (excludes cover images)
    - Converts to CSV-compatible format
 
 ## Output Format
@@ -343,6 +352,26 @@ This scraper uses **intelligent CAPTCHA solving** with multiple strategies:
    - Requires `TWOCAPTCHA_API_KEY` in `.env`
 
 **Best Practice**: Run in non-headless mode for login phase, solve reCAPTCHA manually once. Cookies are saved, so you won't need to login again!
+
+## Recent Improvements
+
+### Text Normalization & Cleaning
+- **Intelligent Position Title Normalization**: Automatically fixes corrupted text like "SDESDE" → "Software Development Engineer"
+- **Abbreviation Expansion**: Expands common abbreviations (SDE, PM, etc.) when context suggests it
+- **Duplicate Removal**: Removes duplicate words and fixes OCR errors
+- **Practical Validation**: Ensures all position titles are realistic and professional
+- **Context-Aware Cleaning**: Uses common sense to infer correct forms when text is garbled
+
+### Profile Image Extraction
+- **Correct Image Detection**: Now extracts profile pictures (not cover images)
+- **Aspect Ratio Filtering**: Uses image dimensions to distinguish between profile photos (square) and cover photos (wide)
+- **Container Detection**: Checks parent elements to exclude cover/background containers
+- **Multiple Selector Fallbacks**: Tries multiple selectors to find the correct profile image
+
+### Modular Architecture
+- **Clean Codebase**: Refactored into focused modules (`browser.js`, `login.js`, `extraction.js`, `scraper.js`, `cli.js`, `utils.js`)
+- **Better Maintainability**: Each module has a single responsibility
+- **Easy to Extend**: Add new features without touching existing code
 
 ## Performance Tips
 

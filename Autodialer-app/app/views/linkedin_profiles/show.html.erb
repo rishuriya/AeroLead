@@ -70,7 +70,7 @@
     <!-- Details -->
     <div class="col-lg-8">
       <!-- About -->
-      <% if @linkedin_profile.about.present? %>
+      <% if @linkedin_profile.about.present? && @linkedin_profile.about != 'N/A' %>
         <div class="card mb-4">
           <div class="card-header">
             <h4 class="card-title">About</h4>
@@ -81,20 +81,7 @@
         </div>
       <% end %>
 
-      <!-- Current Position -->
-      <% if @linkedin_profile.current_position.present? || @linkedin_profile.current_company.present? %>
-        <div class="card mb-4">
-          <div class="card-header">
-            <h4 class="card-title">Current Position</h4>
-          </div>
-          <div class="card-body">
-            <h5><%= @linkedin_profile.current_position %></h5>
-            <p class="text-muted"><%= @linkedin_profile.current_company %></p>
-          </div>
-        </div>
-      <% end %>
-
-      <!-- Experience -->
+      <!-- Experience with Timeline -->
       <% experience = @linkedin_profile.experience_list %>
       <% if experience.present? && experience.any? %>
         <div class="card mb-4">
@@ -102,23 +89,103 @@
             <h4 class="card-title">Experience (<%= experience.length %>)</h4>
           </div>
           <div class="card-body">
-            <% experience.each_with_index do |exp, index| %>
-              <div class="mb-3 <%= 'pb-3 border-bottom' if index < experience.length - 1 %>">
-                <h5 class="mb-1"><%= exp['position'] || exp['title'] || 'Position' %></h5>
-                <p class="text-muted mb-1"><%= exp['company'] || 'Company' %></p>
-                <p class="text-muted small"><%= exp['duration'] || exp['dates'] || 'Duration' %></p>
-                <% if exp['description'].present? %>
-                  <p class="mt-2" style="white-space: pre-wrap;"><%= exp['description'] %></p>
-                <% end %>
-              </div>
-            <% end %>
+            <!-- Timeline View -->
+            <div class="experience-timeline">
+              <% experience.each_with_index do |exp, index| %>
+                <div class="timeline-item">
+                  <div class="timeline-marker"></div>
+                  <div class="timeline-content">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div class="flex-grow-1">
+                        <h5 class="mb-1"><%= exp['position'] || exp['title'] || 'Position' %></h5>
+                        <p class="text-muted mb-1"><strong><%= exp['company'] || 'Company' %></strong></p>
+                        <p class="text-muted small mb-0">
+                          <i class="bi bi-calendar3 me-1"></i><%= exp['duration'] || exp['dates'] || 'Duration' %>
+                        </p>
+                      </div>
+                    </div>
+                    <% if exp['description'].present? %>
+                      <p class="mt-2 mb-0" style="white-space: pre-wrap; color: #666;"><%= exp['description'] %></p>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+
+            <style>
+              .experience-timeline {
+                position: relative;
+                padding-left: 30px;
+              }
+
+              .timeline-item {
+                position: relative;
+                padding-bottom: 30px;
+                padding-left: 40px;
+              }
+
+              .timeline-item:not(:last-child)::before {
+                content: '';
+                position: absolute;
+                left: 7px;
+                top: 24px;
+                bottom: -30px;
+                width: 2px;
+                background: linear-gradient(to bottom, #dee2e6, transparent);
+              }
+
+              .timeline-marker {
+                position: absolute;
+                left: 0;
+                top: 4px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: #0d6efd;
+                border: 3px solid #ffffff;
+                box-shadow: 0 0 0 2px #0d6efd;
+              }
+
+              .timeline-item:first-child .timeline-marker {
+                background: #198754;
+                box-shadow: 0 0 0 2px #198754;
+              }
+
+              .timeline-content {
+                background: #f8f9fa;
+                padding: 15px 20px;
+                border-radius: 8px;
+                border-left: 3px solid #0d6efd;
+                transition: all 0.3s ease;
+              }
+
+              .timeline-item:first-child .timeline-content {
+                border-left-color: #198754;
+              }
+
+              .timeline-content:hover {
+                background: #ffffff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transform: translateX(5px);
+              }
+
+              @media (max-width: 768px) {
+                .experience-timeline {
+                  padding-left: 20px;
+                }
+
+                .timeline-item {
+                  padding-left: 30px;
+                }
+              }
+            </style>
           </div>
         </div>
       <% end %>
 
       <!-- Education -->
       <% education = @linkedin_profile.education_list %>
-      <% if education.present? && education.any? %>
+      <% if education.present? && education.any? && education.length > 0 %>
         <div class="card mb-4">
           <div class="card-header">
             <h4 class="card-title">Education (<%= education.length %>)</h4>
@@ -127,7 +194,10 @@
             <% education.each_with_index do |edu, index| %>
               <div class="mb-3 <%= 'pb-3 border-bottom' if index < education.length - 1 %>">
                 <h5 class="mb-1"><%= edu['school'] || edu['institution'] || 'Institution' %></h5>
-                <p class="text-muted mb-1"><%= edu['degree'] || edu['field'] || 'Degree' %></p>
+                <% degree = edu['degree'] || edu['field'] %>
+                <% if degree.present? && degree != 'N/A' %>
+                  <p class="text-muted mb-1"><%= degree %></p>
+                <% end %>
                 <% if edu['dates'].present? || edu['year'].present? %>
                   <p class="text-muted small"><%= edu['dates'] || edu['year'] %></p>
                 <% end %>

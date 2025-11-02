@@ -39,6 +39,19 @@ Make automated phone calls with custom messages using Twilio API.
 - **Call Logs:** Comprehensive history with filters and search
 - **Background Processing:** Asynchronous job processing with Sidekiq
 
+**⚠️ Important: Free Tier Limitation**
+- **Currently, the app only calls verified phone numbers** (Twilio free tier limitation)
+- You must **add phone numbers to your Twilio account first**, then verify them
+- **To verify numbers:**
+  1. Log into your [Twilio Console](https://console.twilio.com/us1/develop/phone-numbers/manage/verified)
+  2. Go to **Phone Numbers → Verified Caller IDs**
+  3. Click **"Add a new Caller ID"**
+  4. Enter the phone number (must be added to your account)
+  5. Complete verification (usually involves receiving a call/SMS with verification code)
+  6. Once verified, you can call that number from the app
+- **To call unverified numbers:** Upgrade your Twilio account to a paid plan
+- **This is a requirement of Twilio's free trial account**, not a limitation of the app itself
+
 **Supported Call Statuses:**
 - Queued
 - Ringing
@@ -71,24 +84,25 @@ Generate high-quality blog content using AI models (Gemini, OpenAI, Anthropic).
 
 ### 🔍 3. LinkedIn Profile Scraper
 
-Scrape LinkedIn profiles to extract professional information using Puppeteer.
+Scrape LinkedIn profiles to extract professional information using Puppeteer with AI-powered intelligent extraction.
 
 **Key Features:**
 - **Bulk Scraping:** Process multiple LinkedIn profiles simultaneously
-- **AI-Powered Extraction:** Uses Gemini AI to parse profile content
+- **AI-Powered Extraction:** Uses Gemini AI to parse profile content with intelligent text normalization
 - **Cookie Persistence:** Maintains login sessions across scrapes
 - **Batch Processing:** Efficient batch scraping with single browser instance
 - **Real-time Updates:** Live status updates during scraping
 - **Retry Mechanism:** Automatic retry for failed profiles
+- **Experience Timeline View:** Beautiful visual timeline for work experience in the UI
 - **Detailed Data Extraction:**
   - Full name and headline
   - Current position and company
   - Location and about section
-  - Complete work experience history
+  - Complete work experience history (with timeline view)
   - Education background
   - Skills (all skills + top skills)
   - Contact information (when available)
-  - Profile image URL
+  - Profile image URL (not cover image)
   - Connections count
   - Pronouns
 
@@ -323,7 +337,12 @@ All configuration is done via environment variables. See `.env.example` for a co
 | `WEB_CONCURRENCY` | Puma workers | `2` |
 | `RAILS_MAX_THREADS` | Puma threads | `5` |
 
-### Twilio Webhooks
+### Twilio Setup & Limitations
+
+#### Free Tier Limitation
+**⚠️ Important:** On Twilio's free trial account, you can only call **verified 
+
+#### Twilio Webhooks
 
 Configure these webhook URLs in your Twilio console:
 
@@ -363,12 +382,13 @@ node puppeteer_scraper.js scrape https://www.linkedin.com/in/example
 #### Via Web Interface
 
 1. Navigate to **Autodialer** page
-2. Choose input method:
-   - **Manual Entry:** Paste phone numbers (one per line)
-   - **CSV Upload:** Upload a CSV file with `phone_number` column
-3. Enter your message (max 500 characters)
-4. Click **"Start Calling"**
-5. Monitor progress in **Call Logs**
+2. **⚠️ Verify phone numbers first:** It only call to nuber which is verified as we are using free tier
+3. Choose input method:
+   - **Manual Entry:** Paste verified phone numbers (one per line)
+   - **CSV Upload:** Upload a CSV file with `phone_number` column (all numbers must be verified)
+4. Enter your message (max 500 characters)
+5. Click **"Start Calling"**
+6. Monitor progress in **Call Logs**
 
 #### Via API
 

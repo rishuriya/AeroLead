@@ -11,6 +11,14 @@ class LinkedinProfilesController < ApplicationController
     respond_to do |format|
       format.html
       format.json { render json: @linkedin_profiles }
+      format.csv do
+        # Export all completed profiles (not just current page)
+        @all_profiles = LinkedinProfile.completed.order(scraped_at: :desc)
+        send_data generate_csv(@all_profiles),
+                  filename: "linkedin_profiles_#{Date.today}.csv",
+                  type: 'text/csv',
+                  disposition: 'attachment'
+      end
     end
   end
 
@@ -208,5 +216,81 @@ class LinkedinProfilesController < ApplicationController
 
     # Otherwise, treat as plain text (one URL per line)
     content.split(/[\n,]/).map(&:strip).reject(&:blank?)
+  end
+
+  def generate_csv(profiles)
+    require 'csv'
+
+    CSV.generate(headers: true) do |csv|
+      # CSV Headers
+      csv << [
+        'Name',
+        'Headline',
+        'Location',
+        'About',
+        'Current Company',
+        'Current Position',
+        'Education',
+        'Top Skills',
+        'Profile URL',
+        'Connections',
+        'Scraped At',
+        'All Skills',
+        'Skills Count',
+        'Email',
+        'Phone',
+        'Website',
+        'Profile Image URL',
+        'Pronouns',
+        'All Experience',
+        'All Education'
+      ]
+
+      # CSV Rows
+      profiles.each do |profile|
+        csv << [
+          profile.name,
+          profile.headline,
+          profile.location,
+          profile.about,
+          profile.current_company,
+          profile.current_position,
+          profile.education,
+          profile.top_skills,
+          profile.profile_url,
+          profile.connections,
+          profile.scraped_at&.iso8601,
+          profile.all_skills,
+          profile.skills_count,
+          profile.email,
+          profile.phone,
+          profile.website,
+          profile.profile_image_url,
+          profile.pronouns,
+          format_json_for_csv(profile.all_experience),
+          format_json_for_csv(profile.all_education)
+        ]
+      end
+    end
+  end
+
+  def format_json_for_csv(json_field)
+    # Convert JSON array to a readable string for CSV
+    return '' if json_field.blank?
+
+    data = if json_field.is_a?(String)
+             begin
+               JSON.parse(json_field)
+             rescue JSON::ParserError
+               []
+             end
+           else
+             json_field
+           end
+
+    return '' unless data.is_a?(Array)
+
+    # Convert to JSON string for CSV cell
+    data.to_json
   end
 end

@@ -42,8 +42,11 @@
       <%= link_to new_linkedin_profile_path, class: "btn btn-primary me-2" do %>
         Add LinkedIn Profiles
       <% end %>
-      <%= link_to linkedin_profiles_analytics_path, class: "btn btn-outline-secondary" do %>
+      <%= link_to linkedin_profiles_analytics_path, class: "btn btn-outline-secondary me-2" do %>
         View Analytics
+      <% end %>
+      <%= link_to linkedin_profiles_path(format: :csv), class: "btn btn-success" do %>
+        <i class="bi bi-download"></i> Download CSV
       <% end %>
     </div>
   </div>

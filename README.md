@@ -66,6 +66,7 @@ Extract comprehensive professional information from LinkedIn profiles using an i
 - **Background Processing:** Asynchronous calling with Sidekiq
 - **Webhook Integration:** Real-time updates via Twilio webhooks
 - **Analytics:** Success rates, call duration, detailed logs
+- **⚠️ Free Tier Limitation:** Only verified phone numbers can be called (verify in [Twilio Console](https://console.twilio.com/us1/develop/phone-numbers/manage/verified))
 
 ### ✍️ AI Blog Generator
 - **Bulk Generation:** Create up to 20 articles simultaneously
@@ -78,20 +79,28 @@ This is the most sophisticated feature, using a **hybrid approach** that balance
 
 #### What Makes It Special:
 - **Hybrid Authentication:** Opens browser only for login, then reuses cookies
+- **Modular Architecture:** Clean, maintainable codebase split into focused modules:
+  - `browser.js` - Browser initialization and cookie management
+  - `login.js` - Authentication and CAPTCHA handling
+  - `extraction.js` - HTML-to-markdown conversion and AI parsing
+  - `scraper.js` - Main orchestrator class
+  - `cli.js` - Command-line interface
+  - `utils.js` - Utility functions
 - **Intelligent Data Extraction:**
   - Fetches complete DOM structure
   - Filters out styling, links, and HTML artifacts
-  - Extracts text while **preserving hierarchy** (critical for understanding context)
+  - Converts HTML to clean markdown while **preserving hierarchy** (critical for understanding context)
   - Uses Gemini Flash to structure the raw data into meaningful profiles
-
+  - **Smart Text Normalization:** Automatically fixes corrupted text (e.g., "SDESDE" → "Software Development Engineer")
+  - **Intelligent Cleaning:** Expands abbreviations, removes duplicates, fixes OCR errors
 - **Comprehensive Data Capture:**
   - Full name, headline, current position
-  - Complete work experience history with hierarchy
+  - Complete work experience history with hierarchy (timeline view in UI)
   - Education background
   - Skills (all + top skills)
-  - Contact information
-  - Profile image and connections count
-
+  - Contact information (when available)
+  - **Profile image** (not cover image) with aspect ratio detection
+  - Connections count and pronouns
 - **Cookie Management:** Saves LinkedIn session cookies after initial login, enabling:
   - Fast subsequent scraping without repeated logins
   - Lower memory footprint
@@ -226,7 +235,7 @@ If no cookies found:
 Cookies saved for future use
 ```
 
-#### Phase 2: Scraping (Cookie-based, No Browser)
+#### Phase 2: Scraping (Cookie-based, Modular Architecture)
 ```
 User submits LinkedIn URLs (single/bulk/CSV)
     ↓
@@ -239,33 +248,33 @@ Sidekiq Worker picks up batch (max 3 concurrent)
 For each URL in batch:
     ┌──────────────────────────────────────────┐
     │ BROWSER OPENS (with saved cookies)       │
-    │ • Navigates to profile URL               │
-    │ • Fetches complete DOM                   │
-    │ • Filters out:                           │
-    │   - CSS styling                          │
-    │   - JavaScript                           │
-    │   - Navigation links                     │
-    │   - HTML tags                            │
-    │ • Extracts text PRESERVING HIERARCHY     │
-    │   (Headers, sections, lists maintained)  │
+    │ • browser.js: Loads cookies, initializes │
+    │ • login.js: Handles authwall/checkpoint   │
+    │ • Navigates to profile URL                │
+    │ • extraction.js:                         │
+    │   - Converts HTML to clean markdown       │
+    │   - Preserves hierarchy (critical!)       │
+    │   - Filters out sidebars, suggestions     │
+    │   - Extracts profile image (not cover)     │
     │ • BROWSER CLOSES                         │
     └──────────────────────────────────────────┘
     ↓
-Raw hierarchical text sent to Gemini Flash
+Clean markdown sent to Gemini Flash
     ↓
-Gemini structures data into JSON:
+extraction.js: Gemini AI structures data with normalization:
     • name, headline, location
-    • current position & company
-    • work experience (with hierarchy)
+    • current position & company (normalized text)
+    • work experience (fixed duplicates, expanded abbreviations)
     • education
     • skills (top + all)
     • about section
+    • profile_image_url (correct image)
     ↓
 Structured data saved to database
     ↓
 Status updated: scraping → completed
     ↓
-UI polls and displays scraped profiles
+UI polls and displays scraped profiles (with timeline view)
 ```
 
 #### Why Hierarchy Preservation is Critical
@@ -329,8 +338,14 @@ ScaleScribe/
 │   │   ├── migrate/             # Database migrations
 │   │   └── schema.rb            # Database schema
 │   ├── lib/
-│   │   └── linkedin_scraper/    # Integrated Puppeteer scraper
-│   │       ├── puppeteer_scraper.js
+│   │   └── linkedin_scraper/    # Integrated Puppeteer scraper (Modular)
+│   │       ├── puppeteer_scraper.js  # Compatibility wrapper (~30 lines)
+│   │       ├── scraper.js        # Main orchestrator class
+│   │       ├── browser.js        # Browser initialization & cookies
+│   │       ├── login.js          # Authentication & CAPTCHA
+│   │       ├── extraction.js     # HTML-to-markdown & AI parsing
+│   │       ├── cli.js            # Command-line interface
+│   │       ├── utils.js          # Utility functions
 │   │       ├── package.json
 │   │       └── .linkedin_cookies.json  # Session cookies
 │   └── README.md                # Detailed app documentation
@@ -340,8 +355,14 @@ ScaleScribe/
 │   ├── config.py               # Configuration
 │   ├── output/                 # Generated articles
 │   └── README.md               # Blog generator docs
-├── Linkedin-scrapper/           # Standalone LinkedIn scraper
-│   ├── puppeteer_scraper.js    # Puppeteer scraper
+├── Linkedin-scrapper/           # Standalone LinkedIn scraper (Modular)
+│   ├── puppeteer_scraper.js    # Compatibility wrapper (~30 lines)
+│   ├── scraper.js               # Main orchestrator class
+│   ├── browser.js               # Browser initialization & cookies
+│   ├── login.js                 # Authentication & CAPTCHA
+│   ├── extraction.js            # HTML-to-markdown & AI parsing
+│   ├── cli.js                   # Command-line interface
+│   ├── utils.js                 # Utility functions
 │   ├── linkedin_scraper_puppeteer.py  # Python wrapper
 │   ├── config.py                # Python config
 │   └── README.md               # Scraper docs
@@ -361,7 +382,12 @@ ScaleScribe/
 | File | Purpose |
 |------|---------|
 | `Autodialer-app/app/services/linkedin_scraper_service.rb` | Rails service that calls Node.js scraper |
-| `Autodialer-app/lib/linkedin_scraper/puppeteer_scraper.js` | 1,000+ line Puppeteer script (the beast) |
+| `Autodialer-app/lib/linkedin_scraper/puppeteer_scraper.js` | Compatibility wrapper (~30 lines) - delegates to modules |
+| `Autodialer-app/lib/linkedin_scraper/scraper.js` | Main LinkedInScraper orchestrator class |
+| `Autodialer-app/lib/linkedin_scraper/browser.js` | Browser initialization, cookie management |
+| `Autodialer-app/lib/linkedin_scraper/login.js` | Authentication, CAPTCHA solving |
+| `Autodialer-app/lib/linkedin_scraper/extraction.js` | HTML-to-markdown conversion, Gemini AI parsing, profile image extraction |
+| `Autodialer-app/lib/linkedin_scraper/cli.js` | Command-line interface |
 | `Autodialer-app/app/jobs/batch_linkedin_scraping_job.rb` | Batch processing logic for LinkedIn profiles |
 | `Autodialer-app/config/sidekiq.yml` | Worker concurrency configuration |
 | `render.yaml` | Multi-service deployment config |
@@ -470,8 +496,10 @@ For i = 1 to 10:
 ### 4. Twilio Free Tier Restrictions
 
 **Issue:** Can only call verified phone numbers
-- **Limitation:** Must manually verify each number in Twilio console
+- **Limitation:** Must manually verify each number in [Twilio Console](https://console.twilio.com/us1/develop/phone-numbers/manage/verified)
 - **Impact:** Not suitable for large-scale calling without paid plan
+- **Workaround:** Verify numbers before calling (one-time setup per number)
+- **Upgrade Path:** Upgrade to paid Twilio plan to call unverified numbers
 
 ### 5. Browser Reinstantiation Overhead
 
@@ -731,14 +759,21 @@ git push origin feature/your-feature
 1. **Start with controllers:** `Autodialer-app/app/controllers/`
 2. **Check the jobs:** `Autodialer-app/app/jobs/`
 3. **Review services:** `Autodialer-app/app/services/`
-4. **Study the scraper:** `Autodialer-app/lib/linkedin_scraper/puppeteer_scraper.js` (1,000+ lines)
+4. **Study the scraper:** `Autodialer-app/lib/linkedin_scraper/` (modular structure):
+   - `scraper.js` - Main orchestrator
+   - `browser.js` - Browser & cookies
+   - `login.js` - Authentication
+   - `extraction.js` - Data extraction & AI parsing
 
 ### Key Concepts
 - **Sidekiq:** Background job processing
 - **Puppeteer:** Headless browser automation
-- **Cookie-based auth:** Session persistence
-- **DOM parsing:** Text extraction with hierarchy
-- **AI structuring:** Gemini for data parsing
+- **Modular Architecture:** Clean separation of concerns (browser, login, extraction)
+- **Cookie-based auth:** Session persistence across scrapes
+- **HTML-to-markdown:** Clean text extraction with hierarchy preservation
+- **AI structuring:** Gemini Flash for intelligent data parsing
+- **Text normalization:** Automatic correction of corrupted text (e.g., "SDESDE" → "Software Development Engineer")
+- **Profile image detection:** Aspect ratio filtering to exclude cover images
 
 ---
 
@@ -784,11 +819,15 @@ This project is licensed under the MIT License.
 - **Worker:** Cloud Run (Sidekiq with Puppeteer)
 
 ### Recent Changes
-- ✅ LinkedIn scraper integrated with hybrid approach
+- ✅ LinkedIn scraper **modularized** into clean, maintainable modules
+- ✅ **Smart text normalization** - fixes corrupted text (e.g., "SDESDE" → "Software Development Engineer")
+- ✅ **Profile image extraction** - correctly extracts profile pictures (not cover images)
+- ✅ **Experience timeline view** - beautiful visual timeline in UI
 - ✅ Sidekiq concurrency optimized
 - ✅ Cookie-based authentication implemented
-- ✅ Gemini Flash integration for AI parsing
+- ✅ Gemini Flash integration for AI parsing with intelligent cleaning
 - ✅ Batch processing for all features
+- ✅ HTML-to-markdown conversion for cleaner extraction
 - ✅ Deployed to Google Cloud Run
 - ✅ Production deployment with Cloud SQL and Memorystore
 
